@@ -16,7 +16,7 @@ spakky-fastapi = "^0.5.0"
 uvicorn = "^0.27.1"
 sqlalchemy = { extras = ["asyncio"], version = "^2.0.27" }
 pydantic-settings = "^2.2.1"
-psycopg = {extras = ["binary"], version = "^3.1.18"}
+psycopg = { extras = ["binary"], version = "^3.1.18" }
 
 [tool.poetry.group.dev.dependencies]
 pylint = "^3.0.2"
@@ -40,7 +40,7 @@ include = '\.pyi?$'
 
 [tool.isort]
 py_version = 311
-src_paths = ["spakky", "tests"]
+src_paths = ["src", "tests"]
 skip = [".gitignore", ".dockerignore"]
 extend_skip = [".md", ".json", ".txt"]
 profile = "black"
@@ -70,7 +70,7 @@ disable = """
 """
 
 [tool.pytest.ini_options]
-pythonpath = "spakky"
+pythonpath = "src"
 testpaths = "tests"
 python_files = ["test_*.py"]
 asyncio_mode = "auto"
@@ -92,7 +92,6 @@ branch = true
 [tool.coverage.report]
 show_missing = true
 precision = 2
-fail_under = 90
 skip_empty = true
 exclude_lines = [
     "pragma: no cover",

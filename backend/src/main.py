@@ -1,7 +1,6 @@
 import logging
 from logging import Logger, getLogger
 
-import src
 from fastapi import FastAPI
 from spakky.aop.post_processor import AspectBeanPostProcessor
 from spakky.bean.application_context import ApplicationContext
@@ -9,6 +8,8 @@ from spakky.bean.bean import BeanFactory
 from spakky.extensions.logging import AsyncLoggingAdvisor
 from spakky.extensions.transactional import AsyncTransactionalAdvisor
 from spakky_fastapi.post_processor import FastAPIBeanPostProcessor
+
+import src
 
 
 @BeanFactory(bean_name="logger")

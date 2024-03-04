@@ -1,0 +1,35 @@
+name: Test CI
+on:
+  pull_request:
+    branches:
+      - "develop"
+    paths:
+      - "frontend/**"
+  push:
+    branches:
+      - "develop"
+      - "main"
+    paths:
+      - "frontend/**"
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    env:
+      OS: ubuntu-latest
+      NODE: "20.11.1"
+      PROJECT_PATH: "frontend"
+    steps:
+    - name: Checkout Branch
+      uses: actions/checkout@master
+    - name: Setup Node
+      uses: actions/setup-node@master
+      with:
+        node-version: ${{ env.NODE }}
+    - name: Install Dependencies
+      run: |
+        cd ${{ env.PROJECT_PATH }}
+        npm ci
+    - name: Run Test Suite
+      run: |
+        cd ${{ env.PROJECT_PATH }}
+        npm run test

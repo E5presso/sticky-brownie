@@ -1,0 +1,40 @@
+name: Test CI
+on:
+  pull_request:
+    branches:
+      - "develop"
+    paths:
+      - "backend/**"
+  push:
+    branches:
+      - "develop"
+      - "main"
+    paths:
+      - "backend/**"
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    env:
+      OS: ubuntu-latest
+      PYTHON: "3.11"
+      POETRY: "1.7.1"
+      PROJECT_PATH: "backend/src"
+    steps:
+    - name: Checkout Branch
+      uses: actions/checkout@master
+    - name: Setup Python
+      uses: actions/setup-python@master
+      with:
+        python-version: ${{ env.PYTHON }}
+    - name: Setup Poetry
+      uses: abatilo/actions-poetry@v3
+      with:
+        poetry-version: ${{ env.POETRY }}
+    - name: Install Dependencies
+      run: |
+        cd ${{ env.PROJECT_PATH }}
+        poetry install --with ci
+    - name: Run Test Suite
+      run: |
+        cd ${{ env.PROJECT_PATH }}
+        poetry run pytest
