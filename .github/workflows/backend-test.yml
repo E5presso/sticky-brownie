@@ -18,7 +18,7 @@ jobs:
       OS: ubuntu-latest
       PYTHON: "3.11"
       POETRY: "1.7.1"
-      PROJECT_PATH: "backend/src"
+      PROJECT_PATH: "backend"
     steps:
     - name: Checkout Branch
       uses: actions/checkout@master
