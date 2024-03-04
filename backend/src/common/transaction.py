@@ -2,9 +2,7 @@ from asyncio import current_task
 
 from spakky.bean.autowired import autowired
 from spakky.bean.bean import Bean
-from spakky.domain.infrastructures.persistency.transaction import (
-    AbstractAsyncTranasction,
-)
+from spakky.domain.ports.persistency.transaction import AbstractAsyncTranasction
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -12,6 +10,7 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
+
 from src.common.config import Config
 
 
