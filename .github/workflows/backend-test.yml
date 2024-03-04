@@ -4,12 +4,14 @@ on:
     branches:
       - "develop"
     paths:
+      - ".github/workflows/**"
       - "backend/**"
   push:
     branches:
       - "develop"
       - "main"
     paths:
+      - ".github/workflows/**"
       - "backend/**"
 jobs:
   run:
