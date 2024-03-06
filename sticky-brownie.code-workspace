@@ -1,0 +1,28 @@
+{
+    "folders": [
+        {
+            "name": "project-root",
+            "path": "."
+        },
+        {
+            "name": "backend",
+            "path": "./backend"
+        },
+        {
+            "name": "frontend",
+            "path": "./frontend"
+        },
+    ],
+    "settings": {
+        "files.exclude": {
+            "**/*.pyc": {
+                "when": "$(basename).py"
+            },
+            "**/__pycache__": true,
+            "**/.mypy_cache": true,
+            "**/.pytest_cache": true,
+            "**/coverage.xml": true,
+            "**/.coverage": true,
+        },
+    }
+}

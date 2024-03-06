@@ -2,6 +2,7 @@ from typing import Any, Generator
 
 import pytest
 from fastapi import FastAPI
+
 from src.main import app
 
 

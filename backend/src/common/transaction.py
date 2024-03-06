@@ -1,12 +1,9 @@
-from asyncio import current_task
-
 from spakky.bean.autowired import autowired
 from spakky.bean.bean import Bean
 from spakky.domain.ports.persistency.transaction import AbstractAsyncTranasction
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
-    async_scoped_session,
     async_sessionmaker,
     create_async_engine,
 )
@@ -17,8 +14,14 @@ from src.common.config import Config
 @Bean()
 class AsyncTransaction(AbstractAsyncTranasction):
     __engine: AsyncEngine
-    __scoped_sessionmaker: async_scoped_session[AsyncSession]
+    __scoped_sessionmaker: async_sessionmaker[AsyncSession]
     __session: AsyncSession | None
+
+    @property
+    def session(self) -> AsyncSession:
+        if self.__session is None:
+            self.__session = self.__scoped_sessionmaker()
+        return self.__session
 
     @autowired
     def __init__(self, config: Config) -> None:
@@ -28,12 +31,9 @@ class AsyncTransaction(AbstractAsyncTranasction):
             pool_size=config.database.pool_size,
             echo=config.debug,
         )
-        self.__scoped_sessionmaker = async_scoped_session(
-            session_factory=async_sessionmaker(
-                bind=self.__engine,
-                expire_on_commit=False,
-            ),
-            scopefunc=current_task,
+        self.__scoped_sessionmaker = async_sessionmaker(
+            bind=self.__engine,
+            expire_on_commit=False,
         )
         self.__session = None
 
@@ -43,7 +43,6 @@ class AsyncTransaction(AbstractAsyncTranasction):
     async def dispose(self) -> None:
         if self.__session is not None:
             await self.__session.close()
-        await self.__scoped_sessionmaker.remove()
 
     async def commit(self) -> None:
         if self.__session is not None:

@@ -7,3 +7,15 @@ class AuthenticationFailedError(SpakkyDomainError):
 
 class InvalidPasswordResetTokenError(SpakkyDomainError):
     message = "잘못된 비밀번호 재설정 토큰입니다."
+
+
+class UsernameAlreadyExistsError(SpakkyDomainError):
+    message = "이미 사용중인 아이디입니다."
+
+
+class PhoneNumberAlreadyExistsError(SpakkyDomainError):
+    message = "이미 사용중인 휴대폰 번호입니다."
+
+
+class CannotRegisterWithoutAgreementError(SpakkyDomainError):
+    message = "약관 동의를 체크해주세요."

@@ -5,12 +5,12 @@ from spakky.core.mutability import immutable
 from spakky.cryptography.jwt import JWT
 from spakky.domain.usecases.command import Command, IAsyncCommandUseCase
 
-from apps.user.domain.models.gender import Gender
+from src.apps.user.domain.models.gender import Gender
 
 
 @immutable
 class RegisterCommand(Command):
-    account_name: str
+    username: str
     password: str
     name: str
     address: str

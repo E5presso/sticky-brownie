@@ -1,12 +1,17 @@
+from uuid import UUID, uuid4
 from datetime import datetime
 from dataclasses import field
 
-from spakky.core.mutability import immutable
-from spakky.domain.models.value_object import ValueObject
+from spakky.core.mutability import mutable
+from spakky.domain.models.entity import Entity
 
 
-@immutable
-class AuthenticationLog(ValueObject):
+@mutable
+class AuthenticationLog(Entity[UUID]):
     ip_address: str
     user_agent: str
     timestamp: datetime = field(default_factory=datetime.utcnow)
+
+    @classmethod
+    def next_id(cls) -> UUID:
+        return uuid4()

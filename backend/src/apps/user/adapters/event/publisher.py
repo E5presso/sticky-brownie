@@ -1,22 +1,21 @@
-from uuid import UUID
-from typing import Protocol
 from logging import Logger
 from dataclasses import asdict
 
 from spakky.bean.autowired import autowired
 from spakky.bean.bean import Bean
-from spakky.domain.models.aggregate_root import AggregateRoot
-from spakky.domain.ports.event.event_publisher import IAsyncEventPublisher
+
+from src.apps.user.domain.models.user import User
+from src.apps.user.domain.ports.event.publisher import IAsyncUserEventPublisher
 
 
 @Bean()
-class AsyncEventPublisher(IAsyncEventPublisher[UUID], Protocol):
+class AsyncEventPublisher(IAsyncUserEventPublisher):
     __logger: Logger
 
     @autowired
     def __init__(self, logger: Logger) -> None:
         self.__logger = logger
 
-    async def publish(self, aggregate: AggregateRoot[UUID]) -> None:
+    async def publish(self, aggregate: User) -> None:
         for event in aggregate.events:
             self.__logger.info(f"[{type(self).__name__}] {asdict(event)!r}")

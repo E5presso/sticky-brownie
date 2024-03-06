@@ -1,0 +1,14 @@
+version: '3.4'
+
+services:
+  postgresql:
+    container_name: postgresql
+    image: postgres:latest
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: "test"
+      LOCALE: ko_KR
+      LC_COLLATE: C
+      LC_CTYPE: C

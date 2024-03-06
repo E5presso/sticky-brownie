@@ -8,18 +8,18 @@ from spakky.cryptography.password import Password
 from spakky.domain.models.aggregate_root import AggregateRoot
 from spakky.domain.models.domain_event import DomainEvent
 
-from apps.user.domain.errors import (
+from src.apps.user.domain.errors import (
     AuthenticationFailedError,
     InvalidPasswordResetTokenError,
 )
-from apps.user.domain.models.authentication_log import AuthenticationLog
-from apps.user.domain.models.gender import Gender
-from apps.user.domain.models.user_status import UserStatus
+from src.apps.user.domain.models.authentication_log import AuthenticationLog
+from src.apps.user.domain.models.gender import Gender
+from src.apps.user.domain.models.user_status import UserStatus
 
 
 @mutable
 class User(AggregateRoot[UUID]):
-    account_name: str
+    username: str
     """아이디"""
     password: str
     """비밀번호"""
@@ -97,7 +97,7 @@ class User(AggregateRoot[UUID]):
     @classmethod
     def create(
         cls,
-        account_name: str,
+        username: str,
         password: str,
         name: str,
         address: str,
@@ -110,7 +110,7 @@ class User(AggregateRoot[UUID]):
     ) -> Self:
         self: Self = cls(
             uid=User.next_id(),
-            account_name=account_name,
+            username=username,
             password=Password(password=password).export,
             status=UserStatus.GREEN,
             name=name,
@@ -131,7 +131,11 @@ class User(AggregateRoot[UUID]):
             raise AuthenticationFailedError
         self.password_reset_token = None
         self.authentication_logs.append(
-            AuthenticationLog(ip_address=ip_address, user_agent=user_agent)
+            AuthenticationLog(
+                uid=AuthenticationLog.next_id(),
+                ip_address=ip_address,
+                user_agent=user_agent,
+            )
         )
         self.add_event(
             self.Authenticated(uid=self.uid, ip_address=ip_address, user_agent=user_agent)
