@@ -7,8 +7,7 @@ from spakky.domain.usecases.command import Command, IAsyncCommandUseCase
 
 @immutable
 class LoginCommand(Command):
-    phone_number: str | None
-    account_name: str | None
+    username: str
     password: str
     ip_address: str
     user_agent: str

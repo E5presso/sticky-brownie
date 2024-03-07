@@ -912,13 +912,13 @@ files = [
 
 [[package]]
 name = "spakky-core"
-version = "0.7.2"
+version = "0.7.4"
 description = "Highly abstracted Framework core to use DDD & DI/IoC & AOP & Etc..."
 optional = false
 python-versions = ">=3.10"
 files = [
-    {file = "spakky_core-0.7.2-py3-none-any.whl", hash = "sha256:eade74a0cf88bfae303cbf3b493e6a9f16be37ecab171b506256d6081c3b7b56"},
-    {file = "spakky_core-0.7.2.tar.gz", hash = "sha256:a3df2a7e66fef2c0b89ee72a1ae6ac400fbcdfea90c44cee0d17664580e9833a"},
+    {file = "spakky_core-0.7.4-py3-none-any.whl", hash = "sha256:e90cb8b8310916dbba9e51ef375c532aa996b73f0b344937d56cdb446c3340bf"},
+    {file = "spakky_core-0.7.4.tar.gz", hash = "sha256:cd27d19d16a5ca1a10814d4099ac4610be64d4d17d9a1bfa0a489c02db08c108"},
 ]
 
 [package.dependencies]
@@ -927,18 +927,18 @@ typing-extensions = ">=4.9.0,<5.0.0"
 
 [[package]]
 name = "spakky-fastapi"
-version = "0.7.2"
+version = "0.7.4"
 description = "Highly abstracted Framework core to use DDD & DI/IoC & AOP & Etc..."
 optional = false
 python-versions = ">=3.10"
 files = [
-    {file = "spakky_fastapi-0.7.2-py3-none-any.whl", hash = "sha256:b4e43669c05e523f03ee9b98e61f1a30c27a61671960a7d52c8fb516699f0c2e"},
-    {file = "spakky_fastapi-0.7.2.tar.gz", hash = "sha256:bfe17db008057f54288b05072d5ce19ffe49a3c18a38f5612be2b1baf5570f13"},
+    {file = "spakky_fastapi-0.7.4-py3-none-any.whl", hash = "sha256:34b57f333ad6619eecfbf5584c359ba84ab6287e2be2d16790f5b018a9c33d4a"},
+    {file = "spakky_fastapi-0.7.4.tar.gz", hash = "sha256:12bb53e3dd89a2472a54f37f03a7b738fda80e298082c073707c6d14b14505ff"},
 ]
 
 [package.dependencies]
 fastapi = ">=0.109.2,<0.110.0"
-spakky-core = ">=0.7.2"
+spakky-core = ">=0.7.4"
 websockets = ">=12.0,<13.0"
 
 [[package]]
@@ -1169,4 +1169,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "3fd06f02c88cb839026b0d31dca8fea8140f7c26ce48ef994c04352faed6c7aa"
+content-hash = "94960176af5bd6091b0db50cbab6d159f0aba401332eecc6c8285309affef2ae"

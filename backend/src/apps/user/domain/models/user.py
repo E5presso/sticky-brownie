@@ -8,13 +8,13 @@ from spakky.cryptography.password import Password
 from spakky.domain.models.aggregate_root import AggregateRoot
 from spakky.domain.models.domain_event import DomainEvent
 
-from src.apps.user.domain.errors import (
+from apps.user.domain.errors import (
     AuthenticationFailedError,
     InvalidPasswordResetTokenError,
 )
-from src.apps.user.domain.models.authentication_log import AuthenticationLog
-from src.apps.user.domain.models.gender import Gender
-from src.apps.user.domain.models.user_status import UserStatus
+from apps.user.domain.models.authentication_log import AuthenticationLog
+from apps.user.domain.models.gender import Gender
+from apps.user.domain.models.user_status import UserStatus
 
 
 @mutable

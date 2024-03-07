@@ -5,11 +5,11 @@ from datetime import date, datetime
 from sqlalchemy import Date, DateTime, Enum, String, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from common.models.table_base import TableBase
-from src.apps.user.domain.models.gender import Gender
-from src.apps.user.domain.models.user import User
-from src.apps.user.domain.models.user_status import UserStatus
-from src.common.models.authentication_log import AuthenticationLogTable
+from apps.user.domain.models.gender import Gender
+from apps.user.domain.models.user import User
+from apps.user.domain.models.user_status import UserStatus
+from models.authentication_log import AuthenticationLogTable
+from models.table_base import TableBase
 
 
 class UserTable(TableBase[User]):

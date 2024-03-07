@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from src.common.config import Config
+from common.config import Config
 
 
 @Bean()

@@ -5,16 +5,16 @@ from spakky.cryptography.jwt import JWT
 from spakky.extensions.transactional import AsyncTransactional
 from spakky.stereotype.usecase import UseCase
 
-from src.apps.user.domain.errors import (
+from apps.user.domain.errors import (
     CannotRegisterWithoutAgreementError,
     PhoneNumberAlreadyExistsError,
     UsernameAlreadyExistsError,
 )
-from src.apps.user.domain.models.user import User
-from src.apps.user.domain.ports.event.publisher import IAsyncUserEventPublisher
-from src.apps.user.domain.ports.persistency.repository import IAsyncUserRepository
-from src.apps.user.domain.ports.service.token_service import IAsyncTokenService
-from src.apps.user.domain.ports.usecases.register import (
+from apps.user.domain.models.user import User
+from apps.user.domain.ports.event.publisher import IAsyncUserEventPublisher
+from apps.user.domain.ports.persistency.repository import IAsyncUserRepository
+from apps.user.domain.ports.service.token_service import IAsyncTokenService
+from apps.user.domain.ports.usecases.register import (
     IAsyncRegisterCommandUseCase,
     RegisterCommand,
 )

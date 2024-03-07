@@ -5,8 +5,8 @@ from datetime import datetime
 from sqlalchemy import DateTime, ForeignKey, String, Uuid
 from sqlalchemy.orm import Mapped, mapped_column
 
-from common.models.table_base import TableBase
-from src.apps.user.domain.models.authentication_log import AuthenticationLog
+from apps.user.domain.models.authentication_log import AuthenticationLog
+from models.table_base import TableBase
 
 
 class AuthenticationLogTable(TableBase[AuthenticationLog]):

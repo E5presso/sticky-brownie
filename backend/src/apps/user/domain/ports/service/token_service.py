@@ -3,7 +3,7 @@ from typing import Protocol, runtime_checkable
 
 from spakky.cryptography.jwt import JWT
 
-from src.apps.user.domain.models.user import User
+from apps.user.domain.models.user import User
 
 
 @runtime_checkable

@@ -2,7 +2,7 @@ from typing import Protocol, runtime_checkable
 
 from spakky.domain.ports.event.event_publisher import IAsyncEventPublisher
 
-from src.apps.user.domain.models.user import User
+from apps.user.domain.models.user import User
 
 
 @runtime_checkable

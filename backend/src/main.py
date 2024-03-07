@@ -9,8 +9,6 @@ from spakky.extensions.logging import AsyncLoggingAdvisor
 from spakky.extensions.transactional import AsyncTransactionalAdvisor
 from spakky_fastapi.post_processor import FastAPIBeanPostProcessor
 
-import src
-
 
 @BeanFactory(bean_name="logger")
 def get_logger() -> Logger:
@@ -20,7 +18,7 @@ def get_logger() -> Logger:
 
 
 app: FastAPI = FastAPI()
-app_context: ApplicationContext = ApplicationContext(package=src)
+app_context: ApplicationContext = ApplicationContext(package="src")
 app_context.register_bean_post_processor(AspectBeanPostProcessor(get_logger()))
 app_context.register_bean_post_processor(FastAPIBeanPostProcessor(app, get_logger()))
 app_context.register_bean(AsyncLoggingAdvisor)

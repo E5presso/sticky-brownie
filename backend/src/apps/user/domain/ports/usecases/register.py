@@ -5,7 +5,7 @@ from spakky.core.mutability import immutable
 from spakky.cryptography.jwt import JWT
 from spakky.domain.usecases.command import Command, IAsyncCommandUseCase
 
-from src.apps.user.domain.models.gender import Gender
+from apps.user.domain.models.gender import Gender
 
 
 @immutable
