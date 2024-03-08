@@ -19,7 +19,7 @@ class AuthenticationLogTable(TableBase[AuthenticationLog]):
     timestamp: Mapped[datetime] = mapped_column(DateTime())
 
     @classmethod
-    def from_domain(cls, domain: AuthenticationLog) -> Self:
+    async def from_domain(cls, domain: AuthenticationLog) -> Self:
         return cls(
             id=domain.uid,
             ip_address=domain.ip_address,
@@ -27,7 +27,7 @@ class AuthenticationLogTable(TableBase[AuthenticationLog]):
             timestamp=domain.timestamp,
         )
 
-    def to_domain(self) -> AuthenticationLog:
+    async def to_domain(self) -> AuthenticationLog:
         return AuthenticationLog(
             uid=self.id,
             ip_address=self.ip_address,

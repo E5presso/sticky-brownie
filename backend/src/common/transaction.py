@@ -24,8 +24,9 @@ class AsyncTransaction(AbstractAsyncTranasction):
         return self.__session
 
     @autowired
-    def __init__(self, config: Config) -> None:
+    def __init__(self) -> None:
         super().__init__(True)
+        config: Config = Config()
         self.__engine = create_async_engine(
             url=config.database.url,
             pool_size=config.database.pool_size,

@@ -1,21 +1,29 @@
+from uuid import UUID
 from datetime import date
 
-from fastapi import Header, status
-from fastapi.responses import JSONResponse
+from fastapi import Depends, Header, status
+from fastapi.responses import ORJSONResponse
+from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from spakky.bean.autowired import autowired
 from spakky.cryptography.jwt import JWT
 from spakky.extensions.logging import AsyncLogging
 from spakky.stereotype.controller import Controller
-from spakky_fastapi.routing import post
+from spakky_fastapi.jwt_auth import JWTAuth
+from spakky_fastapi.routing import post, put
 
 from apps.user.domain.errors import (
     AuthenticationFailedError,
     CannotRegisterWithoutAgreementError,
     PhoneNumberAlreadyExistsError,
     UsernameAlreadyExistsError,
+    UserNotFoundError,
 )
 from apps.user.domain.models.gender import Gender
+from apps.user.domain.ports.usecases.agree_marketing_promotions import (
+    AgreeMarketingPromotionsCommand,
+    IAsyncAgreeMarketingPromotionsCommandUseCase,
+)
 from apps.user.domain.ports.usecases.login import (
     IAsyncLoginCommandUseCase,
     LoginCommand,
@@ -40,38 +48,42 @@ class RegisterRequest(BaseModel):
     marketing_promotions_agreement: bool
 
 
-class RegisterResponse(BaseModel):
-    token: str
-
-
 class LoginRequest(BaseModel):
     username: str
     password: str
 
 
-class LoginResponse(BaseModel):
-    token: str
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class MarketingPromotionsAgreementRequest(BaseModel):
+    agreed: bool
 
 
 @Controller("/users/v1")
 class UserRestApiController:
     register: IAsyncRegisterCommandUseCase
     login: IAsyncLoginCommandUseCase
+    marketing_promotions_agreement: IAsyncAgreeMarketingPromotionsCommandUseCase
 
     @autowired
     def __init__(
         self,
         register: IAsyncRegisterCommandUseCase,
         login: IAsyncLoginCommandUseCase,
+        marketing_promotions_agreement: IAsyncAgreeMarketingPromotionsCommandUseCase,
     ) -> None:
         self.register = register
         self.login = login
+        self.marketing_promotions_agreement = marketing_promotions_agreement
 
-    @AsyncLogging()
+    @AsyncLogging(masking_keys=["password", "token"])
     @post(
         "/register",
         status_code=status.HTTP_201_CREATED,
-        response_model=RegisterResponse,
+        response_model=TokenResponse,
         responses={
             status.HTTP_400_BAD_REQUEST: {"model": ErrorResponse},
             status.HTTP_409_CONFLICT: {"model": ErrorResponse},
@@ -93,33 +105,39 @@ class UserRestApiController:
                     marketing_promotions_agreement=request.marketing_promotions_agreement,
                 )
             )
-            return RegisterResponse(token=token.export())
+            return ORJSONResponse(
+                status_code=status.HTTP_201_CREATED,
+                content=TokenResponse(
+                    access_token=token.export(),
+                    token_type="bearer",
+                ),
+            )
         except UsernameAlreadyExistsError as e:
-            return JSONResponse(
+            return ORJSONResponse(
                 status_code=status.HTTP_409_CONFLICT,
                 content=ErrorResponse(message=e.message).model_dump(),
             )
         except PhoneNumberAlreadyExistsError as e:
-            return JSONResponse(
+            return ORJSONResponse(
                 status_code=status.HTTP_409_CONFLICT,
                 content=ErrorResponse(message=e.message).model_dump(),
             )
         except CannotRegisterWithoutAgreementError as e:
-            return JSONResponse(
+            return ORJSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 content=ErrorResponse(message=e.message).model_dump(),
             )
 
-    @AsyncLogging()
+    @AsyncLogging(masking_keys=["password", "token"])
     @post(
         "/login",
         status_code=status.HTTP_200_OK,
-        response_model=LoginResponse,
+        response_model=TokenResponse,
         responses={status.HTTP_401_UNAUTHORIZED: {"model": ErrorResponse}},
     )
     async def do_login(
         self,
-        request: LoginRequest,
+        request: OAuth2PasswordRequestForm = Depends(),
         x_forwarded_for: str | None = Header(default=None),
         ip_address: str | None = Header(default=None),
         user_agent: str | None = Header(default=None),
@@ -133,9 +151,43 @@ class UserRestApiController:
                     user_agent=user_agent or "Unknown",
                 )
             )
-            return LoginResponse(token=token.export())
+            return ORJSONResponse(
+                status_code=status.HTTP_201_CREATED,
+                content=TokenResponse(
+                    access_token=token.export(),
+                    token_type="bearer",
+                ).model_dump(),
+            )
         except AuthenticationFailedError as e:
-            return JSONResponse(
+            return ORJSONResponse(
                 status_code=status.HTTP_401_UNAUTHORIZED,
+                content=ErrorResponse(message=e.message).model_dump(),
+            )
+
+    @AsyncLogging(masking_keys=["password", "token"])
+    @JWTAuth(token_url="users/v1/login")
+    @put(
+        "/me/marketing-promotions-agreement",
+        status_code=status.HTTP_200_OK,
+        response_model=None,
+        responses={status.HTTP_404_NOT_FOUND: {"model": ErrorResponse}},
+    )
+    async def do_marketing_promotions_agreement(
+        self, token: JWT, request: MarketingPromotionsAgreementRequest
+    ):
+        try:
+            await self.marketing_promotions_agreement.execute(
+                AgreeMarketingPromotionsCommand(
+                    user_id=UUID(token.payload["sub"]),
+                    agreed=request.agreed,
+                )
+            )
+            return ORJSONResponse(
+                status_code=status.HTTP_200_OK,
+                content=None,
+            )
+        except UserNotFoundError as e:
+            return ORJSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
                 content=ErrorResponse(message=e.message).model_dump(),
             )

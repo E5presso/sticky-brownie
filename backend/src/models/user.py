@@ -32,7 +32,7 @@ class UserTable(TableBase[User]):
     remark: Mapped[str] = mapped_column(String())
 
     @classmethod
-    def from_domain(cls, domain: User) -> Self:
+    async def from_domain(cls, domain: User) -> Self:
         return cls(
             id=domain.uid,
             username=domain.username,
@@ -48,12 +48,13 @@ class UserTable(TableBase[User]):
             terms_and_conditions_agreement=domain.terms_and_conditions_agreement,
             marketing_promotions_agreement=domain.marketing_promotions_agreement,
             authentication_logs=[
-                AuthenticationLogTable.from_domain(x) for x in domain.authentication_logs
+                await AuthenticationLogTable.from_domain(x)
+                for x in domain.authentication_logs
             ],
             remark=domain.remark,
         )
 
-    def to_domain(self) -> User:
+    async def to_domain(self) -> User:
         return User(
             uid=self.id,
             username=self.username,
@@ -68,6 +69,9 @@ class UserTable(TableBase[User]):
             password_reset_token=self.password_reset_token,
             terms_and_conditions_agreement=self.terms_and_conditions_agreement,
             marketing_promotions_agreement=self.marketing_promotions_agreement,
-            authentication_logs=[x.to_domain() for x in self.authentication_logs],
+            authentication_logs=[
+                await x.to_domain()
+                for x in await self.awaitable_attrs.authentication_logs
+            ],
             remark=self.remark,
         )

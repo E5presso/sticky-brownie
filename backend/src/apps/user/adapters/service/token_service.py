@@ -12,8 +12,8 @@ class AsyncTokenService(IAsyncTokenService):
     __token_setting: TokenSetting
 
     @autowired
-    def __init__(self, config: Config) -> None:
-        self.__token_setting = config.token
+    def __init__(self) -> None:
+        self.__token_setting = Config().token
 
     async def generate_token(self, user: User) -> JWT:
         return (

@@ -19,3 +19,7 @@ class PhoneNumberAlreadyExistsError(SpakkyDomainError):
 
 class CannotRegisterWithoutAgreementError(SpakkyDomainError):
     message = "약관 동의를 체크해주세요."
+
+
+class UserNotFoundError(SpakkyDomainError):
+    message = "사용자를 찾을 수 없습니다."

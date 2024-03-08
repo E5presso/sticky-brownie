@@ -2,6 +2,7 @@ from datetime import datetime
 
 from spakky.bean.autowired import autowired
 from spakky.cryptography.jwt import JWT
+from spakky.extensions.logging import AsyncLogging
 from spakky.extensions.transactional import AsyncTransactional
 from spakky.stereotype.usecase import UseCase
 
@@ -37,6 +38,7 @@ class AsyncRegisterCommandUseCase(IAsyncRegisterCommandUseCase):
         self.event_publisher = event_publisher
         self.token_service = token_service
 
+    @AsyncLogging(masking_keys=["password", "token"])
     @AsyncTransactional()
     async def execute(self, command: RegisterCommand) -> JWT:
         username_exists: bool = await self.repository.contains_by_username(
