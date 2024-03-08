@@ -6,9 +6,9 @@ from spakky.domain.usecases.command import Command, IAsyncCommandUseCase
 
 @immutable
 class ResetPasswordCommand(Command):
-    phone_number: str | None
-    account_name: str | None
+    username: str
     password_reset_token: str
+    new_password: str
 
 
 class IAsyncResetPasswordCommandUseCase(

@@ -19,3 +19,8 @@ class IAsyncUserRepository(IAsyncGenericRepository[User, UUID], Protocol):
 
     @abstractmethod
     async def contains_by_phone_number(self, phone_number: str) -> bool: ...
+
+    @abstractmethod
+    async def get_by_password_reset_token(
+        self, password_reset_token: str
+    ) -> User | None: ...

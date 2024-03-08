@@ -8,7 +8,7 @@ from spakky.domain.usecases.command import Command, IAsyncCommandUseCase
 @immutable
 class UpdatePhoneNumberCommand(Command):
     user_id: UUID
-    phone_number: str | None
+    phone_number: str
 
 
 class IAsyncUpdatePhoneNumberCommandUseCase(

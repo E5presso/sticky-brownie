@@ -147,3 +147,18 @@ class AsyncUserRepository(IAsyncUserRepository):
             await self.transaction.session.delete(merged)
             processed.append(merged)
         return [await x.to_domain() for x in processed]
+
+    @AsyncLogging(masking_keys=["password", "token"])
+    async def get_by_password_reset_token(self, password_reset_token: str) -> User | None:
+        result = (
+            (
+                await self.transaction.session.execute(
+                    select(UserTable).where(
+                        UserTable.password_reset_token == password_reset_token
+                    )
+                )
+            )
+            .unique()
+            .scalar_one_or_none()
+        )
+        return await result.to_domain() if result is not None else None

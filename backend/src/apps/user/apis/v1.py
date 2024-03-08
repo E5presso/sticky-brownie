@@ -1,7 +1,7 @@
 from uuid import UUID
 from datetime import date
 
-from fastapi import Depends, Header, status
+from fastapi import Body, Depends, Header, Path, status
 from fastapi.responses import ORJSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
@@ -15,6 +15,7 @@ from spakky_fastapi.routing import post, put
 from apps.user.domain.errors import (
     AuthenticationFailedError,
     CannotRegisterWithoutAgreementError,
+    InvalidPasswordResetTokenError,
     PhoneNumberAlreadyExistsError,
     UsernameAlreadyExistsError,
     UserNotFoundError,
@@ -24,6 +25,10 @@ from apps.user.domain.ports.usecases.agree_marketing_promotions import (
     AgreeMarketingPromotionsCommand,
     IAsyncAgreeMarketingPromotionsCommandUseCase,
 )
+from apps.user.domain.ports.usecases.forgot_password import (
+    ForgotPasswordCommand,
+    IAsyncForgotPasswordCommandUseCase,
+)
 from apps.user.domain.ports.usecases.login import (
     IAsyncLoginCommandUseCase,
     LoginCommand,
@@ -32,10 +37,30 @@ from apps.user.domain.ports.usecases.register import (
     IAsyncRegisterCommandUseCase,
     RegisterCommand,
 )
+from apps.user.domain.ports.usecases.reset_password import (
+    IAsyncResetPasswordCommandUseCase,
+    ResetPasswordCommand,
+)
+from apps.user.domain.ports.usecases.update_password import (
+    IAsyncUpdatePasswordCommandUseCase,
+    UpdatePasswordCommand,
+)
+from apps.user.domain.ports.usecases.update_phone_number import (
+    IAsyncUpdatePhoneNumberCommandUseCase,
+    UpdatePhoneNumberCommand,
+)
+from apps.user.domain.ports.usecases.update_profile import (
+    IAsyncUpdateProfilePasswordCommandUseCase,
+    UpdateProfileCommand,
+)
+from apps.user.domain.ports.usecases.write_remark import (
+    IAsyncWriteRemarkCommandUseCase,
+    WriteRemarkCommand,
+)
 from common.error_response import ErrorResponse
 
 
-class RegisterRequest(BaseModel):
+class Register(BaseModel):
     username: str
     password: str
     name: str
@@ -48,9 +73,34 @@ class RegisterRequest(BaseModel):
     marketing_promotions_agreement: bool
 
 
-class LoginRequest(BaseModel):
+class Login(BaseModel):
     username: str
     password: str
+
+
+class ResetPassword(BaseModel):
+    new_password: str
+
+
+class UpdatePassword(BaseModel):
+    old_password: str
+    new_password: str
+
+
+class UpdatePhoneNumber(BaseModel):
+    phone_number: str
+
+
+class UpdateProfile(BaseModel):
+    name: str
+    address: str
+    gender: Gender
+    birth_date: date
+    billing_name: str
+
+
+class WriteRemark(BaseModel):
+    remark: str
 
 
 class TokenResponse(BaseModel):
@@ -58,73 +108,90 @@ class TokenResponse(BaseModel):
     token_type: str
 
 
-class MarketingPromotionsAgreementRequest(BaseModel):
+class MarketingPromotionsAgreement(BaseModel):
     agreed: bool
 
 
 @Controller("/users/v1")
 class UserRestApiController:
-    register: IAsyncRegisterCommandUseCase
+    agree_marketing_promotions: IAsyncAgreeMarketingPromotionsCommandUseCase
+    forgot_password: IAsyncForgotPasswordCommandUseCase
     login: IAsyncLoginCommandUseCase
-    marketing_promotions_agreement: IAsyncAgreeMarketingPromotionsCommandUseCase
+    register: IAsyncRegisterCommandUseCase
+    reset_password: IAsyncResetPasswordCommandUseCase
+    update_password: IAsyncUpdatePasswordCommandUseCase
+    update_phone_number: IAsyncUpdatePhoneNumberCommandUseCase
+    update_profile: IAsyncUpdateProfilePasswordCommandUseCase
+    write_remark: IAsyncWriteRemarkCommandUseCase
 
     @autowired
     def __init__(
         self,
-        register: IAsyncRegisterCommandUseCase,
+        agree_marketing_promotions: IAsyncAgreeMarketingPromotionsCommandUseCase,
+        forgot_password: IAsyncForgotPasswordCommandUseCase,
         login: IAsyncLoginCommandUseCase,
-        marketing_promotions_agreement: IAsyncAgreeMarketingPromotionsCommandUseCase,
+        register: IAsyncRegisterCommandUseCase,
+        reset_password: IAsyncResetPasswordCommandUseCase,
+        update_password: IAsyncUpdatePasswordCommandUseCase,
+        update_phone_number: IAsyncUpdatePhoneNumberCommandUseCase,
+        update_profile: IAsyncUpdateProfilePasswordCommandUseCase,
+        write_remark: IAsyncWriteRemarkCommandUseCase,
     ) -> None:
-        self.register = register
+        self.agree_marketing_promotions = agree_marketing_promotions
+        self.forgot_password = forgot_password
         self.login = login
-        self.marketing_promotions_agreement = marketing_promotions_agreement
+        self.register = register
+        self.reset_password = reset_password
+        self.update_password = update_password
+        self.update_phone_number = update_phone_number
+        self.update_profile = update_profile
+        self.write_remark = write_remark
 
     @AsyncLogging(masking_keys=["password", "token"])
-    @post(
-        "/register",
-        status_code=status.HTTP_201_CREATED,
-        response_model=TokenResponse,
-        responses={
-            status.HTTP_400_BAD_REQUEST: {"model": ErrorResponse},
-            status.HTTP_409_CONFLICT: {"model": ErrorResponse},
-        },
+    @JWTAuth(token_url="users/v1/login")
+    @put(
+        "/me/marketing-promotions-agreement",
+        status_code=status.HTTP_200_OK,
+        response_model=None,
+        responses={status.HTTP_404_NOT_FOUND: {"model": ErrorResponse}},
     )
-    async def do_register(self, request: RegisterRequest):
+    async def agree_marketing_promotions_api(
+        self, token: JWT, request: MarketingPromotionsAgreement
+    ):
         try:
-            token: JWT = await self.register.execute(
-                command=RegisterCommand(
-                    username=request.username,
-                    password=request.password,
-                    name=request.name,
-                    address=request.address,
-                    phone_number=request.phone_number,
-                    gender=request.gender,
-                    birth_date=request.birth_date,
-                    billing_name=request.billing_name,
-                    terms_and_conditions_agreement=request.terms_and_conditions_agreement,
-                    marketing_promotions_agreement=request.marketing_promotions_agreement,
+            await self.agree_marketing_promotions.execute(
+                AgreeMarketingPromotionsCommand(
+                    user_id=UUID(token.payload["sub"]),
+                    agreed=request.agreed,
                 )
             )
             return ORJSONResponse(
-                status_code=status.HTTP_201_CREATED,
-                content=TokenResponse(
-                    access_token=token.export(),
-                    token_type="bearer",
-                ),
+                status_code=status.HTTP_200_OK,
+                content=None,
             )
-        except UsernameAlreadyExistsError as e:
+        except UserNotFoundError as e:
             return ORJSONResponse(
-                status_code=status.HTTP_409_CONFLICT,
+                status_code=status.HTTP_404_NOT_FOUND,
                 content=ErrorResponse(message=e.message).model_dump(),
             )
-        except PhoneNumberAlreadyExistsError as e:
+
+    @AsyncLogging(masking_keys=["password", "token"])
+    @put(
+        "/{username}/password/forgot",
+        status_code=status.HTTP_200_OK,
+        response_model=None,
+        responses={status.HTTP_404_NOT_FOUND: {"model": ErrorResponse}},
+    )
+    async def forgot_password_api(self, username: str):
+        try:
+            await self.forgot_password.execute(ForgotPasswordCommand(username=username))
             return ORJSONResponse(
-                status_code=status.HTTP_409_CONFLICT,
-                content=ErrorResponse(message=e.message).model_dump(),
+                status_code=status.HTTP_200_OK,
+                content=None,
             )
-        except CannotRegisterWithoutAgreementError as e:
+        except UserNotFoundError as e:
             return ORJSONResponse(
-                status_code=status.HTTP_400_BAD_REQUEST,
+                status_code=status.HTTP_404_NOT_FOUND,
                 content=ErrorResponse(message=e.message).model_dump(),
             )
 
@@ -135,7 +202,7 @@ class UserRestApiController:
         response_model=TokenResponse,
         responses={status.HTTP_401_UNAUTHORIZED: {"model": ErrorResponse}},
     )
-    async def do_login(
+    async def login_api(
         self,
         request: OAuth2PasswordRequestForm = Depends(),
         x_forwarded_for: str | None = Header(default=None),
@@ -165,21 +232,204 @@ class UserRestApiController:
             )
 
     @AsyncLogging(masking_keys=["password", "token"])
-    @JWTAuth(token_url="users/v1/login")
-    @put(
-        "/me/marketing-promotions-agreement",
-        status_code=status.HTTP_200_OK,
-        response_model=None,
-        responses={status.HTTP_404_NOT_FOUND: {"model": ErrorResponse}},
+    @post(
+        "/register",
+        status_code=status.HTTP_201_CREATED,
+        response_model=TokenResponse,
+        responses={
+            status.HTTP_400_BAD_REQUEST: {"model": ErrorResponse},
+            status.HTTP_409_CONFLICT: {"model": ErrorResponse},
+        },
     )
-    async def do_marketing_promotions_agreement(
-        self, token: JWT, request: MarketingPromotionsAgreementRequest
+    async def register_api(self, request: Register):
+        try:
+            token: JWT = await self.register.execute(
+                command=RegisterCommand(
+                    username=request.username,
+                    password=request.password,
+                    name=request.name,
+                    address=request.address,
+                    phone_number=request.phone_number,
+                    gender=request.gender,
+                    birth_date=request.birth_date,
+                    billing_name=request.billing_name,
+                    terms_and_conditions_agreement=request.terms_and_conditions_agreement,
+                    marketing_promotions_agreement=request.marketing_promotions_agreement,
+                )
+            )
+            return ORJSONResponse(
+                status_code=status.HTTP_201_CREATED,
+                content=TokenResponse(
+                    access_token=token.export(),
+                    token_type="bearer",
+                ).model_dump(),
+            )
+        except UsernameAlreadyExistsError as e:
+            return ORJSONResponse(
+                status_code=status.HTTP_409_CONFLICT,
+                content=ErrorResponse(message=e.message).model_dump(),
+            )
+        except PhoneNumberAlreadyExistsError as e:
+            return ORJSONResponse(
+                status_code=status.HTTP_409_CONFLICT,
+                content=ErrorResponse(message=e.message).model_dump(),
+            )
+        except CannotRegisterWithoutAgreementError as e:
+            return ORJSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content=ErrorResponse(message=e.message).model_dump(),
+            )
+
+    @AsyncLogging(masking_keys=["password", "token"])
+    @put("/{username}/password/{password_reset_token}")
+    async def reset_password_api(
+        self,
+        username: str,
+        password_reset_token: str,
+        request: ResetPassword,
     ):
         try:
-            await self.marketing_promotions_agreement.execute(
-                AgreeMarketingPromotionsCommand(
+            await self.reset_password.execute(
+                ResetPasswordCommand(
+                    username=username,
+                    password_reset_token=password_reset_token,
+                    new_password=request.new_password,
+                )
+            )
+            return ORJSONResponse(
+                status_code=status.HTTP_200_OK,
+                content=None,
+            )
+        except UserNotFoundError as e:
+            return ORJSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content=ErrorResponse(message=e.message).model_dump(),
+            )
+        except InvalidPasswordResetTokenError as e:
+            return ORJSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content=ErrorResponse(message=e.message).model_dump(),
+            )
+
+    @AsyncLogging(masking_keys=["password", "token"])
+    @JWTAuth(token_url="users/v1/login")
+    @put(
+        "/me/password",
+        status_code=status.HTTP_200_OK,
+        response_model=None,
+        responses={
+            status.HTTP_401_UNAUTHORIZED: {"model": ErrorResponse},
+            status.HTTP_404_NOT_FOUND: {"model": ErrorResponse},
+        },
+    )
+    async def update_password_api(self, token: JWT, request: UpdatePassword):
+        try:
+            await self.update_password.execute(
+                UpdatePasswordCommand(
                     user_id=UUID(token.payload["sub"]),
-                    agreed=request.agreed,
+                    old_password=request.old_password,
+                    new_password=request.new_password,
+                )
+            )
+            return ORJSONResponse(
+                status_code=status.HTTP_200_OK,
+                content=None,
+            )
+        except UserNotFoundError as e:
+            return ORJSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content=ErrorResponse(message=e.message).model_dump(),
+            )
+        except AuthenticationFailedError as e:
+            return ORJSONResponse(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                content=ErrorResponse(message=e.message).model_dump(),
+            )
+
+    @AsyncLogging(masking_keys=["password", "token"])
+    @JWTAuth(token_url="users/v1/login")
+    @put(
+        "/me/phone-number",
+        status_code=status.HTTP_200_OK,
+        response_model=None,
+        responses={
+            status.HTTP_401_UNAUTHORIZED: {"model": ErrorResponse},
+            status.HTTP_404_NOT_FOUND: {"model": ErrorResponse},
+        },
+    )
+    async def update_phone_number_api(self, token: JWT, request: UpdatePhoneNumber):
+        try:
+            await self.update_phone_number.execute(
+                UpdatePhoneNumberCommand(
+                    user_id=UUID(token.payload["sub"]),
+                    phone_number=request.phone_number,
+                )
+            )
+            return ORJSONResponse(
+                status_code=status.HTTP_200_OK,
+                content=None,
+            )
+        except UserNotFoundError as e:
+            return ORJSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content=ErrorResponse(message=e.message).model_dump(),
+            )
+
+    @AsyncLogging(masking_keys=["password", "token"])
+    @JWTAuth(token_url="users/v1/login")
+    @put(
+        "/me/profile",
+        status_code=status.HTTP_200_OK,
+        response_model=None,
+        responses={
+            status.HTTP_401_UNAUTHORIZED: {"model": ErrorResponse},
+            status.HTTP_404_NOT_FOUND: {"model": ErrorResponse},
+        },
+    )
+    async def update_profile_api(self, token: JWT, request: UpdateProfile):
+        try:
+            await self.update_profile.execute(
+                UpdateProfileCommand(
+                    user_id=UUID(token.payload["sub"]),
+                    name=request.name,
+                    address=request.address,
+                    gender=request.gender,
+                    birth_date=request.birth_date,
+                    billing_name=request.billing_name,
+                )
+            )
+            return ORJSONResponse(
+                status_code=status.HTTP_200_OK,
+                content=None,
+            )
+        except UserNotFoundError as e:
+            return ORJSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content=ErrorResponse(message=e.message).model_dump(),
+            )
+
+    @AsyncLogging(masking_keys=["password", "token"])
+    @JWTAuth(token_url="users/v1/login")
+    @put(
+        "/{user_id}/remark",
+        status_code=status.HTTP_200_OK,
+        response_model=None,
+        responses={
+            status.HTTP_401_UNAUTHORIZED: {"model": ErrorResponse},
+            status.HTTP_404_NOT_FOUND: {"model": ErrorResponse},
+        },
+    )
+    async def write_remark_api(
+        self,
+        token: JWT,  # pylint: disable=unused-argument
+        user_id: UUID = Path(),
+        request: WriteRemark = Body(),
+    ):
+        try:
+            await self.write_remark.execute(
+                WriteRemarkCommand(
+                    user_id=user_id,
+                    remark=request.remark,
                 )
             )
             return ORJSONResponse(
