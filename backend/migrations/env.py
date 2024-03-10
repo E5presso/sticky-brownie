@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 from common.settings.config import Config as ServerConfig
 
 # pylint: disable=unused-import
-from models import user
+from models import file, user
 from models.table_base import TableBase
 
 # this is the Alembic Config object, which provides

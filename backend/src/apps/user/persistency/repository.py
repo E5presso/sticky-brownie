@@ -51,7 +51,7 @@ class AsyncUserRepository(IAsyncUserRepository):
         return await result.to_domain() if result is not None else None
 
     @AsyncLogging()
-    async def get_by_username(self, username: str) -> User | None:
+    async def get_by_username_or_none(self, username: str) -> User | None:
         result = (
             (
                 await self.transaction.session.execute(
@@ -64,7 +64,7 @@ class AsyncUserRepository(IAsyncUserRepository):
         return await result.to_domain() if result is not None else None
 
     @AsyncLogging()
-    async def get_by_phone_number(self, phone_number: str) -> User | None:
+    async def get_by_phone_number_or_none(self, phone_number: str) -> User | None:
         result = (
             (
                 await self.transaction.session.execute(
@@ -149,7 +149,9 @@ class AsyncUserRepository(IAsyncUserRepository):
         return [await x.to_domain() for x in processed]
 
     @AsyncLogging()
-    async def get_by_password_reset_token(self, password_reset_token: str) -> User | None:
+    async def get_by_password_reset_token_or_none(
+        self, password_reset_token: str
+    ) -> User | None:
         result = (
             (
                 await self.transaction.session.execute(

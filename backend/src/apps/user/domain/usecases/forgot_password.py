@@ -31,9 +31,9 @@ class AsyncForgotPasswordCommandUseCase(IAsyncForgotPasswordCommandUseCase):
     @AsyncLogging()
     @AsyncTransactional()
     async def execute(self, command: ForgotPasswordCommand) -> None:
-        user: User | None = await self.repository.get_by_username(
+        user: User | None = await self.repository.get_by_username_or_none(
             command.username
-        ) or await self.repository.get_by_phone_number(command.username)
+        ) or await self.repository.get_by_phone_number_or_none(command.username)
         if user is None:
             raise UserNotFoundError
         user.forgot_password(Key(size=32).hex)

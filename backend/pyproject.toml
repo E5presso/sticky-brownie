@@ -19,6 +19,7 @@ pydantic-settings = "^2.2.1"
 orjson = "^3.9.15"
 python-multipart = "^0.0.9"
 psycopg = { extras = ["binary"], version = "^3.1.18" }
+aiofiles = "^23.2.1"
 
 
 [tool.poetry.group.dev.dependencies]

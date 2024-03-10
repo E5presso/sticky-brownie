@@ -39,6 +39,10 @@ class TokenSetting(BaseSettings):
         return timedelta(hours=self.expire_after_in_hours)
 
 
+class FileSetting(BaseSettings):
+    prefix: str = ""
+
+
 @Configuration()
 class Config(BaseSettings):
     model_config: ClassVar[SettingsConfigDict] = SettingsConfigDict(
@@ -48,6 +52,7 @@ class Config(BaseSettings):
     debug: bool = False
     database: DatabaseSetting = DatabaseSetting()
     token: TokenSetting = TokenSetting()
+    file: FileSetting = FileSetting()
 
     def __init__(self) -> None:
         if PYTHON_ENV == Environment.DEV:

@@ -26,7 +26,7 @@ class Authorize(FunctionAnnotation):
 
 
 @AsyncAspect()
-class AsyncJWTAuthAdvisor(IAsyncAdvisor):
+class AsyncAuthorizeAdvisor(IAsyncAdvisor):
     __logger: Logger
 
     @autowired
@@ -36,7 +36,11 @@ class AsyncJWTAuthAdvisor(IAsyncAdvisor):
 
     @Around(Authorize.contains)
     async def around_async(self, joinpoint: AsyncFunc, *args: Any, **kwargs: Any) -> Any:
-        jwt: JWT = kwargs["token"]
+        token: JWT | str = kwargs["token"]
+        if isinstance(token, str):
+            jwt = JWT(token=token)
+        else:
+            jwt = token
         user_id: str | None = jwt.payload.get("sub", None)
         role: UserRole | None = jwt.payload.get("role", None)
         annotation: Authorize = Authorize.single(joinpoint)

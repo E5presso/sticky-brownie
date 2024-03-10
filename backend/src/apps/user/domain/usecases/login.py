@@ -35,9 +35,9 @@ class AsyncLoginCommandUseCase(IAsyncLoginCommandUseCase):
     @AsyncLogging()
     @AsyncTransactional()
     async def execute(self, command: LoginCommand) -> JWT:
-        user: User | None = await self.repository.get_by_username(
+        user: User | None = await self.repository.get_by_username_or_none(
             command.username
-        ) or await self.repository.get_by_phone_number(command.username)
+        ) or await self.repository.get_by_phone_number_or_none(command.username)
         if user is None:
             raise AuthenticationFailedError
         if user.login(command.password, command.ip_address, command.user_agent) is False:

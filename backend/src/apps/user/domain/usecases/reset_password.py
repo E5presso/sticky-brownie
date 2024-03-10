@@ -30,9 +30,9 @@ class AsyncResetPasswordCommandUseCase(IAsyncResetPasswordCommandUseCase):
     @AsyncLogging()
     @AsyncTransactional()
     async def execute(self, command: ResetPasswordCommand) -> None:
-        user: User | None = await self.repository.get_by_phone_number(
+        user: User | None = await self.repository.get_by_phone_number_or_none(
             command.username
-        ) or await self.repository.get_by_phone_number(command.username)
+        ) or await self.repository.get_by_phone_number_or_none(command.username)
         if user is None:
             raise UserNotFoundError
         user.reset_password(command.password_reset_token, command.new_password)
