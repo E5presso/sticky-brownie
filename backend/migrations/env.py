@@ -7,10 +7,10 @@ from sqlalchemy import MetaData
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 
-from common.config import Config as ServerConfig
+from common.settings.config import Config as ServerConfig
 
 # pylint: disable=unused-import
-from models import authentication_log, user
+from models import user
 from models.table_base import TableBase
 
 # this is the Alembic Config object, which provides

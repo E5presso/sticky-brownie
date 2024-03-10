@@ -27,7 +27,7 @@ class AsyncResetPasswordCommandUseCase(IAsyncResetPasswordCommandUseCase):
         self.repository = repository
         self.event_publisher = event_publisher
 
-    @AsyncLogging(masking_keys=["password", "token"])
+    @AsyncLogging()
     @AsyncTransactional()
     async def execute(self, command: ResetPasswordCommand) -> None:
         user: User | None = await self.repository.get_by_phone_number(

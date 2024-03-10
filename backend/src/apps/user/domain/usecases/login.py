@@ -32,7 +32,7 @@ class AsyncLoginCommandUseCase(IAsyncLoginCommandUseCase):
         self.event_publisher = event_publisher
         self.token_service = token_service
 
-    @AsyncLogging(masking_keys=["password", "token"])
+    @AsyncLogging()
     @AsyncTransactional()
     async def execute(self, command: LoginCommand) -> JWT:
         user: User | None = await self.repository.get_by_username(

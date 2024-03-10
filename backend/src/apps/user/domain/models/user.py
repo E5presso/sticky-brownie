@@ -1,7 +1,6 @@
 from uuid import UUID, uuid4
 from typing import Self
 from datetime import date, datetime
-from dataclasses import field
 
 from spakky.core.mutability import immutable, mutable
 from spakky.cryptography.password import Password
@@ -12,9 +11,9 @@ from apps.user.domain.errors import (
     AuthenticationFailedError,
     InvalidPasswordResetTokenError,
 )
-from apps.user.domain.models.authentication_log import AuthenticationLog
-from apps.user.domain.models.gender import Gender
-from apps.user.domain.models.user_status import UserStatus
+from common.enums.gender import Gender
+from common.enums.user_role import UserRole
+from common.enums.user_status import UserStatus
 
 
 @mutable
@@ -23,6 +22,8 @@ class User(AggregateRoot[UUID]):
     """아이디"""
     password: str
     """비밀번호"""
+    role: UserRole
+    """사용자 역할"""
     status: UserStatus
     """사용자 상태"""
     name: str
@@ -40,9 +41,11 @@ class User(AggregateRoot[UUID]):
     password_reset_token: str | None
     """비밀번호 재설정 토큰"""
     terms_and_conditions_agreement: datetime
+    """이용약관 동의 일시"""
     marketing_promotions_agreement: datetime | None
-    authentication_logs: list[AuthenticationLog] = field(default_factory=list)
+    """마케팅 수신 동의 일시"""
     remark: str = ""
+    """주석"""
 
     @property
     def is_password_forgotten(self) -> bool:
@@ -99,6 +102,7 @@ class User(AggregateRoot[UUID]):
         cls,
         username: str,
         password: str,
+        role: UserRole,
         name: str,
         address: str,
         phone_number: str,
@@ -112,6 +116,7 @@ class User(AggregateRoot[UUID]):
             uid=User.next_id(),
             username=username,
             password=Password(password=password).export,
+            role=role,
             status=UserStatus.GREEN,
             name=name,
             address=address,
@@ -130,13 +135,6 @@ class User(AggregateRoot[UUID]):
         if not Password(password_hash=self.password).challenge(password):
             raise AuthenticationFailedError
         self.password_reset_token = None
-        self.authentication_logs.append(
-            AuthenticationLog(
-                uid=AuthenticationLog.next_id(),
-                ip_address=ip_address,
-                user_agent=user_agent,
-            )
-        )
         self.add_event(
             self.Authenticated(uid=self.uid, ip_address=ip_address, user_agent=user_agent)
         )

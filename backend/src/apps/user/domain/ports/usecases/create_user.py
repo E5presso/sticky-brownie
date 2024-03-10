@@ -1,17 +1,19 @@
+from uuid import UUID
 from typing import Protocol
 from datetime import date
 
 from spakky.core.mutability import immutable
-from spakky.cryptography.jwt import JWT
 from spakky.domain.usecases.command import Command, IAsyncCommandUseCase
 
 from common.enums.gender import Gender
+from common.enums.user_role import UserRole
 
 
 @immutable
-class RegisterCommand(Command):
+class CreateUserCommand(Command):
     username: str
     password: str
+    role: UserRole
     name: str
     address: str
     phone_number: str
@@ -22,6 +24,6 @@ class RegisterCommand(Command):
     marketing_promotions_agreement: bool
 
 
-class IAsyncRegisterCommandUseCase(
-    IAsyncCommandUseCase[RegisterCommand, JWT], Protocol
+class IAsyncCreateUserUseCase(
+    IAsyncCommandUseCase[CreateUserCommand, UUID], Protocol
 ): ...

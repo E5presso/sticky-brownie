@@ -9,7 +9,7 @@ from sqlalchemy import select
 
 from apps.user.domain.models.user import User
 from apps.user.domain.ports.persistency.repository import IAsyncUserRepository
-from common.transaction import AsyncTransaction
+from common.beans.transaction import AsyncTransaction
 from models.user import UserTable
 
 
@@ -21,7 +21,7 @@ class AsyncUserRepository(IAsyncUserRepository):
     def __init__(self, transaction: AsyncTransaction) -> None:
         self.transaction = transaction
 
-    @AsyncLogging(masking_keys=["password", "token"])
+    @AsyncLogging()
     async def single(self, aggregate_id: UUID) -> User:
         try:
             return await (
@@ -37,7 +37,7 @@ class AsyncUserRepository(IAsyncUserRepository):
         except Exception as e:
             raise EntityNotFoundError(aggregate_id) from e
 
-    @AsyncLogging(masking_keys=["password", "token"])
+    @AsyncLogging()
     async def single_or_none(self, aggregate_id: UUID) -> User | None:
         result = (
             (
@@ -50,7 +50,7 @@ class AsyncUserRepository(IAsyncUserRepository):
         )
         return await result.to_domain() if result is not None else None
 
-    @AsyncLogging(masking_keys=["password", "token"])
+    @AsyncLogging()
     async def get_by_username(self, username: str) -> User | None:
         result = (
             (
@@ -63,7 +63,7 @@ class AsyncUserRepository(IAsyncUserRepository):
         )
         return await result.to_domain() if result is not None else None
 
-    @AsyncLogging(masking_keys=["password", "token"])
+    @AsyncLogging()
     async def get_by_phone_number(self, phone_number: str) -> User | None:
         result = (
             (
@@ -76,7 +76,7 @@ class AsyncUserRepository(IAsyncUserRepository):
         )
         return await result.to_domain() if result is not None else None
 
-    @AsyncLogging(masking_keys=["password", "token"])
+    @AsyncLogging()
     async def contains(self, aggregate_id: UUID) -> bool:
         return (
             await self.transaction.session.execute(
@@ -84,7 +84,7 @@ class AsyncUserRepository(IAsyncUserRepository):
             )
         ).scalar_one_or_none() is not None
 
-    @AsyncLogging(masking_keys=["password", "token"])
+    @AsyncLogging()
     async def contains_by_username(self, username: str) -> bool:
         return (
             await self.transaction.session.execute(
@@ -92,7 +92,7 @@ class AsyncUserRepository(IAsyncUserRepository):
             )
         ).scalar_one_or_none() is not None
 
-    @AsyncLogging(masking_keys=["password", "token"])
+    @AsyncLogging()
     async def contains_by_phone_number(self, phone_number: str) -> bool:
         return (
             await self.transaction.session.execute(
@@ -100,7 +100,7 @@ class AsyncUserRepository(IAsyncUserRepository):
             )
         ).scalar_one_or_none() is not None
 
-    @AsyncLogging(masking_keys=["password", "token"])
+    @AsyncLogging()
     async def range(self, aggregate_ids: Sequence[UUID]) -> Sequence[User]:
         result: Sequence[UserTable] = (
             (
@@ -114,14 +114,14 @@ class AsyncUserRepository(IAsyncUserRepository):
         )
         return [await x.to_domain() for x in result]
 
-    @AsyncLogging(masking_keys=["password", "token"])
+    @AsyncLogging()
     async def save(self, aggregate: User) -> User:
         from_domain: UserTable = await UserTable.from_domain(aggregate)
         merged: UserTable = await self.transaction.session.merge(from_domain)
         self.transaction.session.add(merged)
         return await merged.to_domain()
 
-    @AsyncLogging(masking_keys=["password", "token"])
+    @AsyncLogging()
     async def save_all(self, aggregates: Sequence[User]) -> Sequence[User]:
         processed: Sequence[UserTable] = []
         for x in aggregates:
@@ -131,14 +131,14 @@ class AsyncUserRepository(IAsyncUserRepository):
             processed.append(merged)
         return [await x.to_domain() for x in processed]
 
-    @AsyncLogging(masking_keys=["password", "token"])
+    @AsyncLogging()
     async def delete(self, aggregate: User) -> User:
         from_domain: UserTable = await UserTable.from_domain(aggregate)
         merged: UserTable = await self.transaction.session.merge(from_domain)
         await self.transaction.session.delete(merged)
         return await merged.to_domain()
 
-    @AsyncLogging(masking_keys=["password", "token"])
+    @AsyncLogging()
     async def delete_all(self, aggregates: Sequence[User]) -> Sequence[User]:
         processed: Sequence[UserTable] = []
         for x in aggregates:
@@ -148,7 +148,7 @@ class AsyncUserRepository(IAsyncUserRepository):
             processed.append(merged)
         return [await x.to_domain() for x in processed]
 
-    @AsyncLogging(masking_keys=["password", "token"])
+    @AsyncLogging()
     async def get_by_password_reset_token(self, password_reset_token: str) -> User | None:
         result = (
             (

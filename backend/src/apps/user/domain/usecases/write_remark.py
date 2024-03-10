@@ -28,7 +28,7 @@ class AsyncWriteRemarkCommandUseCase(IAsyncWriteRemarkCommandUseCase):
         self.repository = repository
         self.event_publisher = event_publisher
 
-    @AsyncLogging(masking_keys=["password", "token"])
+    @AsyncLogging()
     @AsyncTransactional()
     async def execute(self, command: WriteRemarkCommand) -> None:
         try:

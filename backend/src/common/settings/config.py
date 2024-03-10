@@ -28,6 +28,7 @@ class TokenSetting(BaseSettings):
     secret: str = ""
     is_urlsafe: bool = False
     expire_after_in_hours: int = 0
+    login_url: str = ""
 
     @property
     def secret_key(self) -> Key:

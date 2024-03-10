@@ -4,7 +4,7 @@ from spakky.cryptography.jwt import JWT
 
 from apps.user.domain.models.user import User
 from apps.user.domain.ports.service.token_service import IAsyncTokenService
-from common.config import Config, TokenSetting
+from common.settings.config import Config, TokenSetting
 
 
 @Bean()
@@ -20,5 +20,6 @@ class AsyncTokenService(IAsyncTokenService):
             JWT()
             .set_expiration(self.__token_setting.expire_after)
             .set_payload(sub=str(user.uid))
+            .set_payload(role=user.role)
             .sign(self.__token_setting.secret_key)
         )

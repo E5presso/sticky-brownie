@@ -1,7 +1,7 @@
+from uuid import UUID
 from datetime import datetime
 
 from spakky.bean.autowired import autowired
-from spakky.cryptography.jwt import JWT
 from spakky.extensions.logging import AsyncLogging
 from spakky.extensions.transactional import AsyncTransactional
 from spakky.stereotype.usecase import UseCase
@@ -14,34 +14,29 @@ from apps.user.domain.errors import (
 from apps.user.domain.models.user import User
 from apps.user.domain.ports.event.publisher import IAsyncUserEventPublisher
 from apps.user.domain.ports.persistency.repository import IAsyncUserRepository
-from apps.user.domain.ports.service.token_service import IAsyncTokenService
-from apps.user.domain.ports.usecases.register import (
-    IAsyncRegisterCommandUseCase,
-    RegisterCommand,
+from apps.user.domain.ports.usecases.create_user import (
+    CreateUserCommand,
+    IAsyncCreateUserUseCase,
 )
-from common.enums.user_role import UserRole
 
 
 @UseCase()
-class AsyncRegisterCommandUseCase(IAsyncRegisterCommandUseCase):
+class CreateUserUseCase(IAsyncCreateUserUseCase):
     repository: IAsyncUserRepository
     event_publisher: IAsyncUserEventPublisher
-    token_service: IAsyncTokenService
 
     @autowired
     def __init__(
         self,
         repository: IAsyncUserRepository,
         event_publisher: IAsyncUserEventPublisher,
-        token_service: IAsyncTokenService,
     ) -> None:
         self.repository = repository
         self.event_publisher = event_publisher
-        self.token_service = token_service
 
     @AsyncLogging()
     @AsyncTransactional()
-    async def execute(self, command: RegisterCommand) -> JWT:
+    async def execute(self, command: CreateUserCommand) -> UUID:
         username_exists: bool = await self.repository.contains_by_username(
             command.username
         )
@@ -57,7 +52,7 @@ class AsyncRegisterCommandUseCase(IAsyncRegisterCommandUseCase):
         user: User = User.create(
             username=command.username,
             password=command.password,
-            role=UserRole.USER,
+            role=command.role,
             name=command.name,
             address=command.address,
             phone_number=command.phone_number,
@@ -73,4 +68,4 @@ class AsyncRegisterCommandUseCase(IAsyncRegisterCommandUseCase):
         )
         await self.repository.save(user)
         await self.event_publisher.publish(user)
-        return await self.token_service.generate_token(user)
+        return user.uid

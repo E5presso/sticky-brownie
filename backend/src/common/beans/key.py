@@ -1,7 +1,7 @@
 from spakky.bean.bean import BeanFactory
 from spakky.cryptography.key import Key
 
-from common.config import Config
+from common.settings.config import Config
 
 
 @BeanFactory(bean_name="key")

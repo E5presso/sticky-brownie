@@ -3,12 +3,12 @@ from typing import Self
 from datetime import date, datetime
 
 from sqlalchemy import Date, DateTime, Enum, String, Uuid
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 
-from apps.user.domain.models.gender import Gender
 from apps.user.domain.models.user import User
-from apps.user.domain.models.user_status import UserStatus
-from models.authentication_log import AuthenticationLogTable
+from common.enums.gender import Gender
+from common.enums.user_role import UserRole
+from common.enums.user_status import UserStatus
 from models.table_base import TableBase
 
 
@@ -18,6 +18,7 @@ class UserTable(TableBase[User]):
     id: Mapped[UUID] = mapped_column(Uuid(), primary_key=True)
     username: Mapped[str] = mapped_column(String())
     password: Mapped[str] = mapped_column(String())
+    role: Mapped[UserRole] = mapped_column(Enum(UserRole, native_enum=False))
     status: Mapped[UserStatus] = mapped_column(Enum(UserStatus, native_enum=False))
     name: Mapped[str] = mapped_column(String())
     address: Mapped[str] = mapped_column(String())
@@ -28,7 +29,6 @@ class UserTable(TableBase[User]):
     password_reset_token: Mapped[str | None] = mapped_column(String(), nullable=True)
     terms_and_conditions_agreement: Mapped[datetime] = mapped_column(DateTime())
     marketing_promotions_agreement: Mapped[datetime | None]
-    authentication_logs: Mapped[list[AuthenticationLogTable]] = relationship()
     remark: Mapped[str] = mapped_column(String())
 
     @classmethod
@@ -37,6 +37,7 @@ class UserTable(TableBase[User]):
             id=domain.uid,
             username=domain.username,
             password=domain.password,
+            role=domain.role,
             status=domain.status,
             name=domain.name,
             address=domain.address,
@@ -47,10 +48,6 @@ class UserTable(TableBase[User]):
             password_reset_token=domain.password_reset_token,
             terms_and_conditions_agreement=domain.terms_and_conditions_agreement,
             marketing_promotions_agreement=domain.marketing_promotions_agreement,
-            authentication_logs=[
-                await AuthenticationLogTable.from_domain(x)
-                for x in domain.authentication_logs
-            ],
             remark=domain.remark,
         )
 
@@ -59,6 +56,7 @@ class UserTable(TableBase[User]):
             uid=self.id,
             username=self.username,
             password=self.password,
+            role=self.role,
             status=self.status,
             name=self.name,
             address=self.address,
@@ -69,9 +67,5 @@ class UserTable(TableBase[User]):
             password_reset_token=self.password_reset_token,
             terms_and_conditions_agreement=self.terms_and_conditions_agreement,
             marketing_promotions_agreement=self.marketing_promotions_agreement,
-            authentication_logs=[
-                await x.to_domain()
-                for x in await self.awaitable_attrs.authentication_logs
-            ],
             remark=self.remark,
         )

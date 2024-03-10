@@ -5,7 +5,7 @@ from datetime import date
 from spakky.core.mutability import immutable
 from spakky.domain.usecases.command import Command, IAsyncCommandUseCase
 
-from apps.user.domain.models.gender import Gender
+from common.enums.gender import Gender
 
 
 @immutable

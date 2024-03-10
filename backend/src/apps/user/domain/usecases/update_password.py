@@ -28,7 +28,7 @@ class AsyncUpdatePasswordCommandUseCase(IAsyncUpdatePasswordCommandUseCase):
         self.repository = repository
         self.event_publisher = event_publisher
 
-    @AsyncLogging(masking_keys=["password", "token"])
+    @AsyncLogging()
     @AsyncTransactional()
     async def execute(self, command: UpdatePasswordCommand) -> None:
         try:

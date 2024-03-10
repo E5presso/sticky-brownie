@@ -10,7 +10,7 @@ from spakky.cryptography.jwt import JWT
 from spakky.extensions.logging import AsyncLogging
 from spakky.stereotype.controller import Controller
 from spakky_fastapi.jwt_auth import JWTAuth
-from spakky_fastapi.routing import post, put
+from spakky_fastapi.routing import get, post, put
 
 from apps.user.domain.errors import (
     AuthenticationFailedError,
@@ -20,15 +20,19 @@ from apps.user.domain.errors import (
     UsernameAlreadyExistsError,
     UserNotFoundError,
 )
-from apps.user.domain.models.gender import Gender
 from apps.user.domain.ports.usecases.agree_marketing_promotions import (
     AgreeMarketingPromotionsCommand,
     IAsyncAgreeMarketingPromotionsCommandUseCase,
+)
+from apps.user.domain.ports.usecases.create_user import (
+    CreateUserCommand,
+    IAsyncCreateUserUseCase,
 )
 from apps.user.domain.ports.usecases.forgot_password import (
     ForgotPasswordCommand,
     IAsyncForgotPasswordCommandUseCase,
 )
+from apps.user.domain.ports.usecases.get_me import GetMeQuery, IAsyncGetMeQueryUseCase
 from apps.user.domain.ports.usecases.login import (
     IAsyncLoginCommandUseCase,
     LoginCommand,
@@ -57,12 +61,30 @@ from apps.user.domain.ports.usecases.write_remark import (
     IAsyncWriteRemarkCommandUseCase,
     WriteRemarkCommand,
 )
-from common.error_response import ErrorResponse
+from common.aspects.authorize import Authorize
+from common.enums.gender import Gender
+from common.enums.user_role import UserRole
+from common.schemas.error_response import ErrorResponse
+from common.settings.config import Config
 
 
 class Register(BaseModel):
     username: str
     password: str
+    name: str
+    address: str
+    phone_number: str
+    gender: Gender
+    birth_date: date
+    billing_name: str
+    terms_and_conditions_agreement: bool
+    marketing_promotions_agreement: bool
+
+
+class CreateUser(BaseModel):
+    username: str
+    password: str
+    role: UserRole
     name: str
     address: str
     phone_number: str
@@ -108,11 +130,21 @@ class TokenResponse(BaseModel):
     token_type: str
 
 
+class GetMeResponse(BaseModel):
+    user_id: UUID
+    name: str
+    phone_number: str
+    address: str
+    gender: Gender
+    birth_date: date
+    billing_name: str
+
+
 class MarketingPromotionsAgreement(BaseModel):
     agreed: bool
 
 
-@Controller("/users/v1")
+@Controller("/users")
 class UserRestApiController:
     agree_marketing_promotions: IAsyncAgreeMarketingPromotionsCommandUseCase
     forgot_password: IAsyncForgotPasswordCommandUseCase
@@ -123,6 +155,8 @@ class UserRestApiController:
     update_phone_number: IAsyncUpdatePhoneNumberCommandUseCase
     update_profile: IAsyncUpdateProfilePasswordCommandUseCase
     write_remark: IAsyncWriteRemarkCommandUseCase
+    create_user: IAsyncCreateUserUseCase
+    get_me: IAsyncGetMeQueryUseCase
 
     @autowired
     def __init__(
@@ -136,6 +170,8 @@ class UserRestApiController:
         update_phone_number: IAsyncUpdatePhoneNumberCommandUseCase,
         update_profile: IAsyncUpdateProfilePasswordCommandUseCase,
         write_remark: IAsyncWriteRemarkCommandUseCase,
+        create_user: IAsyncCreateUserUseCase,
+        get_me: IAsyncGetMeQueryUseCase,
     ) -> None:
         self.agree_marketing_promotions = agree_marketing_promotions
         self.forgot_password = forgot_password
@@ -146,9 +182,11 @@ class UserRestApiController:
         self.update_phone_number = update_phone_number
         self.update_profile = update_profile
         self.write_remark = write_remark
+        self.create_user = create_user
+        self.get_me = get_me
 
-    @AsyncLogging(masking_keys=["password", "token"])
-    @JWTAuth(token_url="users/v1/login")
+    @AsyncLogging()
+    @JWTAuth(token_url=Config().token.login_url)
     @put(
         "/me/marketing-promotions-agreement",
         status_code=status.HTTP_200_OK,
@@ -175,7 +213,7 @@ class UserRestApiController:
                 content=ErrorResponse(message=e.message).model_dump(),
             )
 
-    @AsyncLogging(masking_keys=["password", "token"])
+    @AsyncLogging()
     @put(
         "/{username}/password/forgot",
         status_code=status.HTTP_200_OK,
@@ -195,7 +233,7 @@ class UserRestApiController:
                 content=ErrorResponse(message=e.message).model_dump(),
             )
 
-    @AsyncLogging(masking_keys=["password", "token"])
+    @AsyncLogging()
     @post(
         "/login",
         status_code=status.HTTP_200_OK,
@@ -231,7 +269,7 @@ class UserRestApiController:
                 content=ErrorResponse(message=e.message).model_dump(),
             )
 
-    @AsyncLogging(masking_keys=["password", "token"])
+    @AsyncLogging()
     @post(
         "/register",
         status_code=status.HTTP_201_CREATED,
@@ -280,7 +318,7 @@ class UserRestApiController:
                 content=ErrorResponse(message=e.message).model_dump(),
             )
 
-    @AsyncLogging(masking_keys=["password", "token"])
+    @AsyncLogging()
     @put("/{username}/password/{password_reset_token}")
     async def reset_password_api(
         self,
@@ -311,8 +349,8 @@ class UserRestApiController:
                 content=ErrorResponse(message=e.message).model_dump(),
             )
 
-    @AsyncLogging(masking_keys=["password", "token"])
-    @JWTAuth(token_url="users/v1/login")
+    @AsyncLogging()
+    @JWTAuth(token_url=Config().token.login_url)
     @put(
         "/me/password",
         status_code=status.HTTP_200_OK,
@@ -346,8 +384,8 @@ class UserRestApiController:
                 content=ErrorResponse(message=e.message).model_dump(),
             )
 
-    @AsyncLogging(masking_keys=["password", "token"])
-    @JWTAuth(token_url="users/v1/login")
+    @AsyncLogging()
+    @JWTAuth(token_url=Config().token.login_url)
     @put(
         "/me/phone-number",
         status_code=status.HTTP_200_OK,
@@ -375,8 +413,8 @@ class UserRestApiController:
                 content=ErrorResponse(message=e.message).model_dump(),
             )
 
-    @AsyncLogging(masking_keys=["password", "token"])
-    @JWTAuth(token_url="users/v1/login")
+    @AsyncLogging()
+    @JWTAuth(token_url=Config().token.login_url)
     @put(
         "/me/profile",
         status_code=status.HTTP_200_OK,
@@ -408,14 +446,16 @@ class UserRestApiController:
                 content=ErrorResponse(message=e.message).model_dump(),
             )
 
-    @AsyncLogging(masking_keys=["password", "token"])
-    @JWTAuth(token_url="users/v1/login")
+    @AsyncLogging()
+    @JWTAuth(token_url=Config().token.login_url)
+    @Authorize({UserRole.BACKOFFICER})
     @put(
         "/{user_id}/remark",
         status_code=status.HTTP_200_OK,
         response_model=None,
         responses={
             status.HTTP_401_UNAUTHORIZED: {"model": ErrorResponse},
+            status.HTTP_403_FORBIDDEN: {"model": None},
             status.HTTP_404_NOT_FOUND: {"model": ErrorResponse},
         },
     )
@@ -435,6 +475,88 @@ class UserRestApiController:
             return ORJSONResponse(
                 status_code=status.HTTP_200_OK,
                 content=None,
+            )
+        except UserNotFoundError as e:
+            return ORJSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content=ErrorResponse(message=e.message).model_dump(),
+            )
+
+    @AsyncLogging()
+    @JWTAuth(token_url=Config().token.login_url)
+    @Authorize({UserRole.BACKOFFICER})
+    @post(
+        "",
+        status_code=status.HTTP_200_OK,
+        response_model=None,
+        responses={
+            status.HTTP_401_UNAUTHORIZED: {"model": ErrorResponse},
+            status.HTTP_403_FORBIDDEN: {"model": None},
+            status.HTTP_409_CONFLICT: {"model": ErrorResponse},
+        },
+    )
+    async def create_user_api(
+        self,
+        token: JWT,  # pylint: disable=unused-argument
+        request: CreateUser = Body(),
+    ):
+        try:
+            await self.create_user.execute(
+                CreateUserCommand(
+                    username=request.username,
+                    password=request.password,
+                    role=request.role,
+                    name=request.name,
+                    address=request.address,
+                    phone_number=request.phone_number,
+                    gender=request.gender,
+                    birth_date=request.birth_date,
+                    billing_name=request.billing_name,
+                    terms_and_conditions_agreement=request.terms_and_conditions_agreement,
+                    marketing_promotions_agreement=request.marketing_promotions_agreement,
+                )
+            )
+            return ORJSONResponse(
+                status_code=status.HTTP_200_OK,
+                content=None,
+            )
+        except UsernameAlreadyExistsError as e:
+            return ORJSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content=ErrorResponse(message=e.message).model_dump(),
+            )
+        except PhoneNumberAlreadyExistsError as e:
+            return ORJSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content=ErrorResponse(message=e.message).model_dump(),
+            )
+
+    @AsyncLogging()
+    @JWTAuth(token_url=Config().token.login_url)
+    @get(
+        "/me",
+        status_code=status.HTTP_200_OK,
+        response_model=GetMeResponse,
+        responses={
+            status.HTTP_401_UNAUTHORIZED: {"model": ErrorResponse},
+            status.HTTP_404_NOT_FOUND: {"model": ErrorResponse},
+        },
+    )
+    async def get_me_api(self, token: JWT):
+        user_id: UUID = UUID(token.payload["sub"])
+        try:
+            result = await self.get_me.execute(GetMeQuery(user_id=user_id))
+            return ORJSONResponse(
+                status_code=status.HTTP_200_OK,
+                content=GetMeResponse(
+                    user_id=result.user_id,
+                    name=result.name,
+                    phone_number=result.phone_number,
+                    address=result.address,
+                    gender=result.gender,
+                    birth_date=result.birth_date,
+                    billing_name=result.billing_name,
+                ).model_dump(),
             )
         except UserNotFoundError as e:
             return ORJSONResponse(

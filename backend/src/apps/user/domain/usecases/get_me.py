@@ -1,5 +1,5 @@
 from spakky.bean.autowired import autowired
-from spakky.cryptography.key import Key
+from spakky.domain.ports.persistency.repository import EntityNotFoundError
 from spakky.extensions.logging import AsyncLogging
 from spakky.extensions.transactional import AsyncTransactional
 from spakky.stereotype.usecase import UseCase
@@ -8,14 +8,15 @@ from apps.user.domain.errors import UserNotFoundError
 from apps.user.domain.models.user import User
 from apps.user.domain.ports.event.publisher import IAsyncUserEventPublisher
 from apps.user.domain.ports.persistency.repository import IAsyncUserRepository
-from apps.user.domain.ports.usecases.forgot_password import (
-    ForgotPasswordCommand,
-    IAsyncForgotPasswordCommandUseCase,
+from apps.user.domain.ports.usecases.get_me import (
+    GetMeQuery,
+    GetMeResult,
+    IAsyncGetMeQueryUseCase,
 )
 
 
 @UseCase()
-class AsyncForgotPasswordCommandUseCase(IAsyncForgotPasswordCommandUseCase):
+class AsyncGetMeQueryUseCase(IAsyncGetMeQueryUseCase):
     repository: IAsyncUserRepository
     event_publisher: IAsyncUserEventPublisher
 
@@ -30,12 +31,17 @@ class AsyncForgotPasswordCommandUseCase(IAsyncForgotPasswordCommandUseCase):
 
     @AsyncLogging()
     @AsyncTransactional()
-    async def execute(self, command: ForgotPasswordCommand) -> None:
-        user: User | None = await self.repository.get_by_username(
-            command.username
-        ) or await self.repository.get_by_phone_number(command.username)
-        if user is None:
-            raise UserNotFoundError
-        user.forgot_password(Key(size=32).hex)
-        await self.repository.save(user)
-        await self.event_publisher.publish(user)
+    async def execute(self, query: GetMeQuery) -> GetMeResult:
+        try:
+            user: User = await self.repository.single(query.user_id)
+            return GetMeResult(
+                user_id=user.uid,
+                name=user.name,
+                phone_number=user.phone_number,
+                address=user.address,
+                gender=user.gender,
+                birth_date=user.birth_date,
+                billing_name=user.billing_name,
+            )
+        except EntityNotFoundError as e:
+            raise UserNotFoundError from e
