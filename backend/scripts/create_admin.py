@@ -1,5 +1,5 @@
 import asyncio
-from typing import AsyncGenerator
+from typing import Sequence, AsyncGenerator
 from datetime import date, datetime
 from contextlib import asynccontextmanager
 
@@ -12,7 +12,7 @@ from common.enums.user_role import UserRole
 from common.settings.config import Config
 from models.user import UserTable
 
-BACKOFFICERS = [
+BACKOFFICERS: Sequence[User] = [
     User.create(
         username="jieun",
         password="Pa55word!!",
