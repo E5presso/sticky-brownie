@@ -6,6 +6,7 @@ from fastapi import Response, status
 from spakky.aop.advice import Around
 from spakky.aop.advisor import IAsyncAdvisor
 from spakky.aop.aspect import AsyncAspect
+from spakky.aop.order import Order
 from spakky.bean.autowired import autowired
 from spakky.core.annotation import FunctionAnnotation
 from spakky.core.types import AsyncFunc, P
@@ -25,6 +26,7 @@ class Authorize(FunctionAnnotation):
         return super().__call__(obj)
 
 
+@Order(2)
 @AsyncAspect()
 class AsyncAuthorizeAdvisor(IAsyncAdvisor):
     __logger: Logger
@@ -36,11 +38,7 @@ class AsyncAuthorizeAdvisor(IAsyncAdvisor):
 
     @Around(Authorize.contains)
     async def around_async(self, joinpoint: AsyncFunc, *args: Any, **kwargs: Any) -> Any:
-        token: JWT | str = kwargs["token"]
-        if isinstance(token, str):
-            jwt = JWT(token=token)
-        else:
-            jwt = token
+        jwt: JWT = kwargs["token"]
         user_id: str | None = jwt.payload.get("sub", None)
         role: UserRole | None = jwt.payload.get("role", None)
         annotation: Authorize = Authorize.single(joinpoint)

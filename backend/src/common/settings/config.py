@@ -41,6 +41,7 @@ class TokenSetting(BaseSettings):
 
 class FileSetting(BaseSettings):
     prefix: str = ""
+    chunk_size: int = 1024 * 1024
 
 
 @Configuration()
