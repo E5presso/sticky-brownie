@@ -1,8 +1,6 @@
 # test automation
 build/reports/**
 
-files
-
 ### Node ###
 # Logs
 logs
