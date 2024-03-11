@@ -45,7 +45,7 @@ class FileManageRestApiController:
 
     @AsyncLogging()
     @JWTAuth(LOGIN_URL)
-    @Authorize({UserRole.BACKOFFICER, UserRole.USER})
+    @Authorize({UserRole.BACKOFFICER})
     @post("", name="파일 등록", status_code=status.HTTP_201_CREATED)
     async def save_file_api(
         self, token: JWT, file: UploadFile = File()  # pylint: disable=unused-argument
