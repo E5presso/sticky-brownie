@@ -9,6 +9,7 @@ from spakky.bean.bean import BeanFactory
 from spakky.extensions.logging import AsyncLoggingAdvisor
 from spakky.extensions.transactional import AsyncTransactionalAdvisor
 from spakky_fastapi.jwt_auth import AsyncJWTAuthAdvisor
+from spakky_fastapi.middlewares.error_handling import ErrorHandlingMiddleware
 from spakky_fastapi.post_processor import FastAPIBeanPostProcessor
 from starlette.middleware.cors import CORSMiddleware
 
@@ -28,6 +29,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(ErrorHandlingMiddleware)
 app_context: ApplicationContext = ApplicationContext(package="src")
 app_context.register_bean_post_processor(AspectBeanPostProcessor(get_logger()))
 app_context.register_bean_post_processor(FastAPIBeanPostProcessor(app, get_logger()))

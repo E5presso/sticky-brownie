@@ -12,11 +12,10 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-spakky-fastapi = "^0.7.11"
+spakky-fastapi = "^0.7.13"
 uvicorn = "^0.27.1"
 sqlalchemy = { extras = ["asyncio"], version = "^2.0.27" }
 pydantic-settings = "^2.2.1"
-orjson = "^3.9.15"
 python-multipart = "^0.0.9"
 psycopg = { extras = ["binary"], version = "^3.1.18" }
 aiofiles = "^23.2.1"

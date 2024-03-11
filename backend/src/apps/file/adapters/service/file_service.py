@@ -1,14 +1,12 @@
 from typing import AsyncIterator
 
 import aiofiles
+import aiofiles.os
 from spakky.bean.bean import Bean
 
 from apps.file.domain.models.file import File
-from apps.file.domain.ports.service.file_service import (
-    IAsyncFileService,
-    IAsyncInStream,
-    IAsyncOutStream,
-)
+from apps.file.domain.ports.service.file_service import IAsyncFileService
+from common.interfaces.stream import IAsyncInStream, IAsyncOutStream
 from common.settings.config import Config
 
 
@@ -44,3 +42,6 @@ class AsyncUploadFileService(IAsyncFileService):
 
     async def get_by_id(self, file: File) -> IAsyncOutStream:
         return AsyncOutStream(f"{self.__prefix}/{file.uid}")
+
+    async def delete(self, file: File) -> None:
+        await aiofiles.os.remove(f"{self.__prefix}/{file.uid}")

@@ -1026,13 +1026,13 @@ files = [
 
 [[package]]
 name = "spakky-core"
-version = "0.7.11"
+version = "0.7.12"
 description = "Highly abstracted Framework core to use DDD & DI/IoC & AOP & Etc..."
 optional = false
 python-versions = ">=3.10"
 files = [
-    {file = "spakky_core-0.7.11-py3-none-any.whl", hash = "sha256:011350feb4eee3909aa27fddb27bb55a36f9901decdf56c53ad573698e547992"},
-    {file = "spakky_core-0.7.11.tar.gz", hash = "sha256:9fb53b13ccf816b32c2a35c036aa237e74e736dd06fb891d42075bc8db942a72"},
+    {file = "spakky_core-0.7.12-py3-none-any.whl", hash = "sha256:925a0ecb3fa124cf390a3d57285da451ca9535388e7f993d30b2edc8bc1a5ccc"},
+    {file = "spakky_core-0.7.12.tar.gz", hash = "sha256:9091b9cda36f8000a11b9b961d3dea4d46c51049678c6b818baab173aeea5216"},
 ]
 
 [package.dependencies]
@@ -1041,18 +1041,19 @@ typing-extensions = ">=4.9.0,<5.0.0"
 
 [[package]]
 name = "spakky-fastapi"
-version = "0.7.11"
+version = "0.7.13"
 description = "Highly abstracted Framework core to use DDD & DI/IoC & AOP & Etc..."
 optional = false
 python-versions = ">=3.10"
 files = [
-    {file = "spakky_fastapi-0.7.11-py3-none-any.whl", hash = "sha256:0b6cea4a1cc30d70b81c955018df998321226c72a1ed93d887fd836a7c5154bc"},
-    {file = "spakky_fastapi-0.7.11.tar.gz", hash = "sha256:20c52157a10cfeb9cc67c38098d6366c12727f1a5ada019fc3b792a175be7d88"},
+    {file = "spakky_fastapi-0.7.13-py3-none-any.whl", hash = "sha256:82a5bdf411b35e449993d33e0ec52625eee9625254978127340e491fc6f82901"},
+    {file = "spakky_fastapi-0.7.13.tar.gz", hash = "sha256:5f90c6dc806e0e1878ae855a247340f59354ce09a207cc0ff1e45fafafa55e9c"},
 ]
 
 [package.dependencies]
 fastapi = ">=0.109.2,<0.110.0"
-spakky-core = ">=0.7.11"
+orjson = ">=3.9.15,<4.0.0"
+spakky-core = ">=0.7.12"
 websockets = ">=12.0,<13.0"
 
 [[package]]
@@ -1294,4 +1295,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "99adb912c785aebd948f0bbb99d2edc13661b6066138e238051a1a1982571d44"
+content-hash = "028d1c9c6a0b753360213f3a860e2447ddc2156029c786ff947502f90a4bdb61"

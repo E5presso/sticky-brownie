@@ -9,7 +9,9 @@ from spakky.bean.autowired import autowired
 from spakky.cryptography.jwt import JWT
 from spakky.extensions.logging import AsyncLogging
 from spakky.stereotype.controller import Controller
+from spakky_fastapi.error import BadRequest, Conflict, NotFound, Unauthorized
 from spakky_fastapi.jwt_auth import JWTAuth
+from spakky_fastapi.middlewares.error_handling import ErrorResponse
 from spakky_fastapi.routing import get, post, put
 
 from apps.user.domain.errors import (
@@ -64,7 +66,6 @@ from apps.user.domain.ports.usecases.write_remark import (
 from common.aspects.authorize import Authorize
 from common.enums.gender import Gender
 from common.enums.user_role import UserRole
-from common.schemas.error_response import ErrorResponse
 from common.settings.config import Config
 
 
@@ -190,8 +191,10 @@ class UserRestApiController:
     @put(
         "/me/marketing-promotions-agreement",
         status_code=status.HTTP_200_OK,
-        response_model=None,
-        responses={status.HTTP_404_NOT_FOUND: {"model": ErrorResponse}},
+        responses={
+            status.HTTP_401_UNAUTHORIZED: {"model": ErrorResponse},
+            status.HTTP_404_NOT_FOUND: {"model": ErrorResponse},
+        },
     )
     async def agree_marketing_promotions_api(
         self, token: JWT, request: MarketingPromotionsAgreement
@@ -203,35 +206,22 @@ class UserRestApiController:
                     agreed=request.agreed,
                 )
             )
-            return ORJSONResponse(
-                status_code=status.HTTP_200_OK,
-                content=None,
-            )
+            return ORJSONResponse(status_code=status.HTTP_200_OK, content=None)
         except UserNotFoundError as e:
-            return ORJSONResponse(
-                status_code=status.HTTP_404_NOT_FOUND,
-                content=ErrorResponse(message=e.message).model_dump(),
-            )
+            raise NotFound(error=e) from e
 
     @AsyncLogging()
     @put(
         "/{username}/password/forgot",
         status_code=status.HTTP_200_OK,
-        response_model=None,
         responses={status.HTTP_404_NOT_FOUND: {"model": ErrorResponse}},
     )
     async def forgot_password_api(self, username: str):
         try:
             await self.forgot_password.execute(ForgotPasswordCommand(username=username))
-            return ORJSONResponse(
-                status_code=status.HTTP_200_OK,
-                content=None,
-            )
+            return ORJSONResponse(status_code=status.HTTP_200_OK, content=None)
         except UserNotFoundError as e:
-            return ORJSONResponse(
-                status_code=status.HTTP_404_NOT_FOUND,
-                content=ErrorResponse(message=e.message).model_dump(),
-            )
+            raise NotFound(error=e) from e
 
     @AsyncLogging()
     @post(
@@ -264,10 +254,7 @@ class UserRestApiController:
                 ).model_dump(),
             )
         except AuthenticationFailedError as e:
-            return ORJSONResponse(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                content=ErrorResponse(message=e.message).model_dump(),
-            )
+            raise Unauthorized(error=e) from e
 
     @AsyncLogging()
     @post(
@@ -303,23 +290,20 @@ class UserRestApiController:
                 ).model_dump(),
             )
         except UsernameAlreadyExistsError as e:
-            return ORJSONResponse(
-                status_code=status.HTTP_409_CONFLICT,
-                content=ErrorResponse(message=e.message).model_dump(),
-            )
+            raise Conflict(error=e) from e
         except PhoneNumberAlreadyExistsError as e:
-            return ORJSONResponse(
-                status_code=status.HTTP_409_CONFLICT,
-                content=ErrorResponse(message=e.message).model_dump(),
-            )
+            raise Conflict(error=e) from e
         except CannotRegisterWithoutAgreementError as e:
-            return ORJSONResponse(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                content=ErrorResponse(message=e.message).model_dump(),
-            )
+            raise BadRequest(error=e) from e
 
     @AsyncLogging()
-    @put("/{username}/password/{password_reset_token}")
+    @put(
+        "/{username}/password/{password_reset_token}",
+        responses={
+            status.HTTP_400_BAD_REQUEST: {"model": ErrorResponse},
+            status.HTTP_404_NOT_FOUND: {"model": ErrorResponse},
+        },
+    )
     async def reset_password_api(
         self,
         username: str,
@@ -334,27 +318,17 @@ class UserRestApiController:
                     new_password=request.new_password,
                 )
             )
-            return ORJSONResponse(
-                status_code=status.HTTP_200_OK,
-                content=None,
-            )
+            return ORJSONResponse(status_code=status.HTTP_200_OK, content=None)
         except UserNotFoundError as e:
-            return ORJSONResponse(
-                status_code=status.HTTP_404_NOT_FOUND,
-                content=ErrorResponse(message=e.message).model_dump(),
-            )
+            raise NotFound(error=e) from e
         except InvalidPasswordResetTokenError as e:
-            return ORJSONResponse(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                content=ErrorResponse(message=e.message).model_dump(),
-            )
+            raise BadRequest(error=e) from e
 
     @AsyncLogging()
     @JWTAuth(token_url=Config().token.login_url)
     @put(
         "/me/password",
         status_code=status.HTTP_200_OK,
-        response_model=None,
         responses={
             status.HTTP_401_UNAUTHORIZED: {"model": ErrorResponse},
             status.HTTP_404_NOT_FOUND: {"model": ErrorResponse},
@@ -369,27 +343,17 @@ class UserRestApiController:
                     new_password=request.new_password,
                 )
             )
-            return ORJSONResponse(
-                status_code=status.HTTP_200_OK,
-                content=None,
-            )
+            return ORJSONResponse(status_code=status.HTTP_200_OK, content=None)
         except UserNotFoundError as e:
-            return ORJSONResponse(
-                status_code=status.HTTP_404_NOT_FOUND,
-                content=ErrorResponse(message=e.message).model_dump(),
-            )
+            raise NotFound(error=e) from e
         except AuthenticationFailedError as e:
-            return ORJSONResponse(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                content=ErrorResponse(message=e.message).model_dump(),
-            )
+            raise Unauthorized(error=e) from e
 
     @AsyncLogging()
     @JWTAuth(token_url=Config().token.login_url)
     @put(
         "/me/phone-number",
         status_code=status.HTTP_200_OK,
-        response_model=None,
         responses={
             status.HTTP_401_UNAUTHORIZED: {"model": ErrorResponse},
             status.HTTP_404_NOT_FOUND: {"model": ErrorResponse},
@@ -403,22 +367,15 @@ class UserRestApiController:
                     phone_number=request.phone_number,
                 )
             )
-            return ORJSONResponse(
-                status_code=status.HTTP_200_OK,
-                content=None,
-            )
+            return ORJSONResponse(status_code=status.HTTP_200_OK, content=None)
         except UserNotFoundError as e:
-            return ORJSONResponse(
-                status_code=status.HTTP_404_NOT_FOUND,
-                content=ErrorResponse(message=e.message).model_dump(),
-            )
+            raise NotFound(error=e) from e
 
     @AsyncLogging()
     @JWTAuth(token_url=Config().token.login_url)
     @put(
         "/me/profile",
         status_code=status.HTTP_200_OK,
-        response_model=None,
         responses={
             status.HTTP_401_UNAUTHORIZED: {"model": ErrorResponse},
             status.HTTP_404_NOT_FOUND: {"model": ErrorResponse},
@@ -436,15 +393,9 @@ class UserRestApiController:
                     billing_name=request.billing_name,
                 )
             )
-            return ORJSONResponse(
-                status_code=status.HTTP_200_OK,
-                content=None,
-            )
+            return ORJSONResponse(status_code=status.HTTP_200_OK, content=None)
         except UserNotFoundError as e:
-            return ORJSONResponse(
-                status_code=status.HTTP_404_NOT_FOUND,
-                content=ErrorResponse(message=e.message).model_dump(),
-            )
+            raise NotFound(error=e) from e
 
     @AsyncLogging()
     @JWTAuth(token_url=Config().token.login_url)
@@ -452,10 +403,9 @@ class UserRestApiController:
     @put(
         "/{user_id}/remark",
         status_code=status.HTTP_200_OK,
-        response_model=None,
         responses={
             status.HTTP_401_UNAUTHORIZED: {"model": ErrorResponse},
-            status.HTTP_403_FORBIDDEN: {"model": None},
+            status.HTTP_403_FORBIDDEN: {"model": ErrorResponse},
             status.HTTP_404_NOT_FOUND: {"model": ErrorResponse},
         },
     )
@@ -472,15 +422,9 @@ class UserRestApiController:
                     remark=request.remark,
                 )
             )
-            return ORJSONResponse(
-                status_code=status.HTTP_200_OK,
-                content=None,
-            )
+            return ORJSONResponse(status_code=status.HTTP_200_OK, content=None)
         except UserNotFoundError as e:
-            return ORJSONResponse(
-                status_code=status.HTTP_404_NOT_FOUND,
-                content=ErrorResponse(message=e.message).model_dump(),
-            )
+            raise NotFound(error=e) from e
 
     @AsyncLogging()
     @JWTAuth(token_url=Config().token.login_url)
@@ -488,10 +432,9 @@ class UserRestApiController:
     @post(
         "",
         status_code=status.HTTP_200_OK,
-        response_model=None,
         responses={
             status.HTTP_401_UNAUTHORIZED: {"model": ErrorResponse},
-            status.HTTP_403_FORBIDDEN: {"model": None},
+            status.HTTP_403_FORBIDDEN: {"model": ErrorResponse},
             status.HTTP_409_CONFLICT: {"model": ErrorResponse},
         },
     )
@@ -516,20 +459,11 @@ class UserRestApiController:
                     marketing_promotions_agreement=request.marketing_promotions_agreement,
                 )
             )
-            return ORJSONResponse(
-                status_code=status.HTTP_200_OK,
-                content=None,
-            )
+            return ORJSONResponse(status_code=status.HTTP_200_OK, content=None)
         except UsernameAlreadyExistsError as e:
-            return ORJSONResponse(
-                status_code=status.HTTP_404_NOT_FOUND,
-                content=ErrorResponse(message=e.message).model_dump(),
-            )
+            raise Conflict(error=e) from e
         except PhoneNumberAlreadyExistsError as e:
-            return ORJSONResponse(
-                status_code=status.HTTP_404_NOT_FOUND,
-                content=ErrorResponse(message=e.message).model_dump(),
-            )
+            raise Conflict(error=e) from e
 
     @AsyncLogging()
     @JWTAuth(token_url=Config().token.login_url)
@@ -559,7 +493,4 @@ class UserRestApiController:
                 ).model_dump(),
             )
         except UserNotFoundError as e:
-            return ORJSONResponse(
-                status_code=status.HTTP_404_NOT_FOUND,
-                content=ErrorResponse(message=e.message).model_dump(),
-            )
+            raise NotFound(error=e) from e
