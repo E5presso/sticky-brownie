@@ -1,6 +1,7 @@
 from spakky.bean.autowired import autowired
 from spakky.bean.bean import Bean
 from spakky.cryptography.jwt import JWT
+from spakky.extensions.logging import AsyncLogging
 
 from apps.user.domain.interfaces.service.token_service import IAsyncTokenService
 from apps.user.domain.models.user import User
@@ -15,6 +16,7 @@ class AsyncTokenService(IAsyncTokenService):
     def __init__(self) -> None:
         self.__token_setting = Config().token
 
+    @AsyncLogging()
     async def generate_token(self, user: User) -> JWT:
         return (
             JWT()
