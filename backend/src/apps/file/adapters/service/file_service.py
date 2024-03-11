@@ -9,6 +9,8 @@ from apps.file.domain.ports.service.file_service import IAsyncFileService
 from common.interfaces.stream import IAsyncInStream, IAsyncOutStream
 from common.settings.config import Config
 
+CHUNK_SIZE: int = Config().file.chunk_size
+
 
 class AsyncOutStream(IAsyncOutStream):
     path: str
@@ -19,10 +21,10 @@ class AsyncOutStream(IAsyncOutStream):
     # pylint: disable=invalid-overridden-method
     async def __aiter__(self) -> AsyncIterator[bytes]:
         async with aiofiles.open(self.path, "rb") as stream:
-            chunk: bytes = await stream.read(Config().file.chunk_size)
+            chunk: bytes = await stream.read(CHUNK_SIZE)
             while chunk:
                 yield chunk
-                chunk = await stream.read(Config().file.chunk_size)
+                chunk = await stream.read(CHUNK_SIZE)
 
 
 @Bean()
@@ -34,10 +36,11 @@ class AsyncUploadFileService(IAsyncFileService):
 
     async def save(self, file: File, stream: IAsyncInStream) -> None:
         async with aiofiles.open(f"{self.__prefix}/{file.uid}", "ab+") as in_stream:
-            chunk: bytes = await stream.read(Config().file.chunk_size)
+            chunk: bytes = await stream.read(CHUNK_SIZE)
             while chunk:
                 await in_stream.write(chunk)
-                chunk = await stream.read(Config().file.chunk_size)
+                chunk = await stream.read(CHUNK_SIZE)
+
         await stream.close()
 
     async def get_by_id(self, file: File) -> IAsyncOutStream:
