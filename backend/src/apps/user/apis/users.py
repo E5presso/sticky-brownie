@@ -1,7 +1,7 @@
 from uuid import UUID
 from datetime import date
 
-from fastapi import status
+from fastapi import Body, status
 from pydantic import BaseModel
 from spakky.bean.autowired import autowired
 from spakky.cryptography.jwt import JWT
@@ -101,7 +101,7 @@ class UsersRestApiController:
         status_code=status.HTTP_200_OK,
     )
     async def agree_marketing_promotions_api(
-        self, token: JWT, request: MarketingPromotionsAgreement
+        self, token: JWT, request: MarketingPromotionsAgreement = Body()
     ) -> None:
         try:
             await self.agree_marketing_promotions.execute(
@@ -116,7 +116,9 @@ class UsersRestApiController:
     @AsyncLogging()
     @JWTAuth(LOGIN_URL)
     @put("/password", name="비밀번호 변경", status_code=status.HTTP_200_OK)
-    async def update_password_api(self, token: JWT, request: UpdatePassword) -> None:
+    async def update_password_api(
+        self, token: JWT, request: UpdatePassword = Body()
+    ) -> None:
         try:
             await self.update_password.execute(
                 UpdatePasswordCommand(
@@ -134,7 +136,7 @@ class UsersRestApiController:
     @JWTAuth(LOGIN_URL)
     @put("/phone-number", name="휴대폰 번호 변경", status_code=status.HTTP_200_OK)
     async def update_phone_number_api(
-        self, token: JWT, request: UpdatePhoneNumber
+        self, token: JWT, request: UpdatePhoneNumber = Body()
     ) -> None:
         try:
             await self.update_phone_number.execute(
@@ -149,7 +151,9 @@ class UsersRestApiController:
     @AsyncLogging()
     @JWTAuth(LOGIN_URL)
     @put("/profile", name="프로필 정보 수정", status_code=status.HTTP_200_OK)
-    async def update_profile_api(self, token: JWT, request: UpdateProfile) -> None:
+    async def update_profile_api(
+        self, token: JWT, request: UpdateProfile = Body()
+    ) -> None:
         try:
             await self.update_profile.execute(
                 UpdateProfileCommand(
