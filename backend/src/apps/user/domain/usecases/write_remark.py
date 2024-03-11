@@ -5,13 +5,13 @@ from spakky.extensions.transactional import AsyncTransactional
 from spakky.stereotype.usecase import UseCase
 
 from apps.user.domain.errors import UserNotFoundError
-from apps.user.domain.models.user import User
-from apps.user.domain.ports.event.publisher import IAsyncUserEventPublisher
-from apps.user.domain.ports.persistency.repository import IAsyncUserRepository
-from apps.user.domain.ports.usecases.write_remark import (
+from apps.user.domain.interfaces.event.publisher import IAsyncUserEventPublisher
+from apps.user.domain.interfaces.persistency.repository import IAsyncUserRepository
+from apps.user.domain.interfaces.usecases.write_remark import (
     IAsyncWriteRemarkCommandUseCase,
     WriteRemarkCommand,
 )
+from apps.user.domain.models.user import User
 
 
 @UseCase()

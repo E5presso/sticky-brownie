@@ -4,8 +4,8 @@ import aiofiles
 import aiofiles.os
 from spakky.bean.bean import Bean
 
+from apps.file.domain.interfaces.service.file_service import IAsyncFileService
 from apps.file.domain.models.file import File
-from apps.file.domain.ports.service.file_service import IAsyncFileService
 from common.interfaces.stream import IAsyncInStream, IAsyncOutStream
 from common.settings.config import Config
 

@@ -11,13 +11,13 @@ from apps.user.domain.errors import (
     PhoneNumberAlreadyExistsError,
     UsernameAlreadyExistsError,
 )
-from apps.user.domain.models.user import User
-from apps.user.domain.ports.event.publisher import IAsyncUserEventPublisher
-from apps.user.domain.ports.persistency.repository import IAsyncUserRepository
-from apps.user.domain.ports.usecases.create_user import (
+from apps.user.domain.interfaces.event.publisher import IAsyncUserEventPublisher
+from apps.user.domain.interfaces.persistency.repository import IAsyncUserRepository
+from apps.user.domain.interfaces.usecases.create_user import (
     CreateUserCommand,
     IAsyncCreateUserUseCase,
 )
+from apps.user.domain.models.user import User
 
 
 @UseCase()

@@ -7,8 +7,8 @@ from spakky.extensions.logging import AsyncLogging
 from spakky.stereotype.repository import Repository
 from sqlalchemy import select
 
+from apps.user.domain.interfaces.persistency.repository import IAsyncUserRepository
 from apps.user.domain.models.user import User
-from apps.user.domain.ports.persistency.repository import IAsyncUserRepository
 from common.beans.transaction import AsyncTransaction
 from models.user import UserTable
 

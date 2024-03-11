@@ -1026,13 +1026,13 @@ files = [
 
 [[package]]
 name = "spakky-core"
-version = "0.7.12"
+version = "0.7.13"
 description = "Highly abstracted Framework core to use DDD & DI/IoC & AOP & Etc..."
 optional = false
 python-versions = ">=3.10"
 files = [
-    {file = "spakky_core-0.7.12-py3-none-any.whl", hash = "sha256:925a0ecb3fa124cf390a3d57285da451ca9535388e7f993d30b2edc8bc1a5ccc"},
-    {file = "spakky_core-0.7.12.tar.gz", hash = "sha256:9091b9cda36f8000a11b9b961d3dea4d46c51049678c6b818baab173aeea5216"},
+    {file = "spakky_core-0.7.13-py3-none-any.whl", hash = "sha256:91895e1b755e5d1b9f8d848a52ed6d0643f9e62ff5a148757900fd88c15a8597"},
+    {file = "spakky_core-0.7.13.tar.gz", hash = "sha256:1bd6450c574a63971b0a27da8b522107ed381ece727cdeb59c04a316840329a8"},
 ]
 
 [package.dependencies]
@@ -1041,19 +1041,19 @@ typing-extensions = ">=4.9.0,<5.0.0"
 
 [[package]]
 name = "spakky-fastapi"
-version = "0.7.13"
+version = "0.7.16"
 description = "Highly abstracted Framework core to use DDD & DI/IoC & AOP & Etc..."
 optional = false
 python-versions = ">=3.10"
 files = [
-    {file = "spakky_fastapi-0.7.13-py3-none-any.whl", hash = "sha256:82a5bdf411b35e449993d33e0ec52625eee9625254978127340e491fc6f82901"},
-    {file = "spakky_fastapi-0.7.13.tar.gz", hash = "sha256:5f90c6dc806e0e1878ae855a247340f59354ce09a207cc0ff1e45fafafa55e9c"},
+    {file = "spakky_fastapi-0.7.16-py3-none-any.whl", hash = "sha256:da8717adb2a867c32ba6064407610768e079ca8a69836b0c2d461021404c745d"},
+    {file = "spakky_fastapi-0.7.16.tar.gz", hash = "sha256:9942708ccfa36d39a286c0168f899a2735bbd494741dfdef8e23020832ef1db1"},
 ]
 
 [package.dependencies]
 fastapi = ">=0.109.2,<0.110.0"
 orjson = ">=3.9.15,<4.0.0"
-spakky-core = ">=0.7.12"
+spakky-core = ">=0.7.13"
 websockets = ">=12.0,<13.0"
 
 [[package]]
@@ -1295,4 +1295,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "028d1c9c6a0b753360213f3a860e2447ddc2156029c786ff947502f90a4bdb61"
+content-hash = "a4c1449c70e6f9d3bd1be2beec4ce53ad306603df002fe7b736e29c69f738e45"

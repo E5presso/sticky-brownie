@@ -11,14 +11,14 @@ from apps.user.domain.errors import (
     PhoneNumberAlreadyExistsError,
     UsernameAlreadyExistsError,
 )
-from apps.user.domain.models.user import User
-from apps.user.domain.ports.event.publisher import IAsyncUserEventPublisher
-from apps.user.domain.ports.persistency.repository import IAsyncUserRepository
-from apps.user.domain.ports.service.token_service import IAsyncTokenService
-from apps.user.domain.ports.usecases.register import (
+from apps.user.domain.interfaces.event.publisher import IAsyncUserEventPublisher
+from apps.user.domain.interfaces.persistency.repository import IAsyncUserRepository
+from apps.user.domain.interfaces.service.token_service import IAsyncTokenService
+from apps.user.domain.interfaces.usecases.register import (
     IAsyncRegisterCommandUseCase,
     RegisterCommand,
 )
+from apps.user.domain.models.user import User
 from common.enums.user_role import UserRole
 
 

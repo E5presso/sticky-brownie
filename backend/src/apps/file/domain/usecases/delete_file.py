@@ -4,14 +4,14 @@ from spakky.extensions.transactional import AsyncTransactional
 from spakky.stereotype.usecase import UseCase
 
 from apps.file.domain.errors import FileNameNotFoundError
-from apps.file.domain.models.file import File
-from apps.file.domain.ports.event.publisher import IAsyncFileEventPublisher
-from apps.file.domain.ports.persistency.repository import IAsyncFileRepository
-from apps.file.domain.ports.service.file_service import IAsyncFileService
-from apps.file.domain.ports.usecases.delete_file import (
+from apps.file.domain.interfaces.event.publisher import IAsyncFileEventPublisher
+from apps.file.domain.interfaces.persistency.repository import IAsyncFileRepository
+from apps.file.domain.interfaces.service.file_service import IAsyncFileService
+from apps.file.domain.interfaces.usecases.delete_file import (
     DeleteFileCommand,
     IAsyncDeleteFileUseCase,
 )
+from apps.file.domain.models.file import File
 
 
 @UseCase()

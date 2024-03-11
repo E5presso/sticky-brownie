@@ -4,14 +4,14 @@ from spakky.extensions.transactional import AsyncTransactional
 from spakky.stereotype.usecase import UseCase
 
 from apps.file.domain.errors import FileNameAlreadyExistsError
-from apps.file.domain.models.file import File
-from apps.file.domain.ports.event.publisher import IAsyncFileEventPublisher
-from apps.file.domain.ports.persistency.repository import IAsyncFileRepository
-from apps.file.domain.ports.service.file_service import IAsyncFileService
-from apps.file.domain.ports.usecases.save_file import (
+from apps.file.domain.interfaces.event.publisher import IAsyncFileEventPublisher
+from apps.file.domain.interfaces.persistency.repository import IAsyncFileRepository
+from apps.file.domain.interfaces.service.file_service import IAsyncFileService
+from apps.file.domain.interfaces.usecases.save_file import (
     IAsyncSaveFileUseCase,
     SaveFileCommand,
 )
+from apps.file.domain.models.file import File
 
 
 @UseCase()

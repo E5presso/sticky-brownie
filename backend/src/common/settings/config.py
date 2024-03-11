@@ -27,6 +27,8 @@ class DatabaseSetting(BaseSettings):
 class TokenSetting(BaseSettings):
     secret: str = ""
     is_urlsafe: bool = False
+    expire_after_in_seconds: int = 0
+    expire_after_in_minutes: int = 0
     expire_after_in_hours: int = 0
     login_url: str = ""
 
@@ -36,7 +38,11 @@ class TokenSetting(BaseSettings):
 
     @property
     def expire_after(self) -> timedelta:
-        return timedelta(hours=self.expire_after_in_hours)
+        return timedelta(
+            hours=self.expire_after_in_hours,
+            minutes=self.expire_after_in_minutes,
+            seconds=self.expire_after_in_seconds,
+        )
 
 
 class FileSetting(BaseSettings):

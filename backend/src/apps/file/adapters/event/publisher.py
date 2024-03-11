@@ -4,8 +4,8 @@ from dataclasses import asdict
 from spakky.bean.autowired import autowired
 from spakky.bean.bean import Bean
 
+from apps.file.domain.interfaces.event.publisher import IAsyncFileEventPublisher
 from apps.file.domain.models.file import File
-from apps.file.domain.ports.event.publisher import IAsyncFileEventPublisher
 
 
 @Bean()

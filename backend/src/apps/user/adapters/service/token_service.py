@@ -2,8 +2,8 @@ from spakky.bean.autowired import autowired
 from spakky.bean.bean import Bean
 from spakky.cryptography.jwt import JWT
 
+from apps.user.domain.interfaces.service.token_service import IAsyncTokenService
 from apps.user.domain.models.user import User
-from apps.user.domain.ports.service.token_service import IAsyncTokenService
 from common.settings.config import Config, TokenSetting
 
 

@@ -44,7 +44,7 @@ class User(AggregateRoot[UUID]):
     """이용약관 동의 일시"""
     marketing_promotions_agreement: datetime | None
     """마케팅 수신 동의 일시"""
-    remark: str = ""
+    remark: str
     """주석"""
 
     @property
@@ -127,6 +127,7 @@ class User(AggregateRoot[UUID]):
             password_reset_token=None,
             terms_and_conditions_agreement=terms_and_conditions_agreement,
             marketing_promotions_agreement=marketing_promotions_agreement,
+            remark="",
         )
         self.add_event(self.UserCreated(uid=self.uid))
         return self

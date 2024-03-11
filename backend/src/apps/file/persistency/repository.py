@@ -7,8 +7,8 @@ from spakky.extensions.logging import AsyncLogging
 from spakky.stereotype.repository import Repository
 from sqlalchemy import select
 
+from apps.file.domain.interfaces.persistency.repository import IAsyncFileRepository
 from apps.file.domain.models.file import File
-from apps.file.domain.ports.persistency.repository import IAsyncFileRepository
 from common.beans.transaction import AsyncTransaction
 from models.file import FileTable
 

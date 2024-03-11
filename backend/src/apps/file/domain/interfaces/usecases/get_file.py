@@ -3,7 +3,7 @@ from typing import Protocol
 from spakky.core.mutability import immutable
 from spakky.domain.usecases.query import IAsyncQueryUseCase, Query
 
-from apps.file.domain.ports.service.file_service import IAsyncOutStream
+from apps.file.domain.interfaces.service.file_service import IAsyncOutStream
 
 
 @immutable

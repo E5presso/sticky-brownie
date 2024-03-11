@@ -5,14 +5,14 @@ from spakky.extensions.transactional import AsyncTransactional
 from spakky.stereotype.usecase import UseCase
 
 from apps.user.domain.errors import AuthenticationFailedError
-from apps.user.domain.models.user import User
-from apps.user.domain.ports.event.publisher import IAsyncUserEventPublisher
-from apps.user.domain.ports.persistency.repository import IAsyncUserRepository
-from apps.user.domain.ports.service.token_service import IAsyncTokenService
-from apps.user.domain.ports.usecases.login import (
+from apps.user.domain.interfaces.event.publisher import IAsyncUserEventPublisher
+from apps.user.domain.interfaces.persistency.repository import IAsyncUserRepository
+from apps.user.domain.interfaces.service.token_service import IAsyncTokenService
+from apps.user.domain.interfaces.usecases.login import (
     IAsyncLoginCommandUseCase,
     LoginCommand,
 )
+from apps.user.domain.models.user import User
 
 
 @UseCase()
