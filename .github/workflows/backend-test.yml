@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       OS: ubuntu-latest
-      PYTHON: "3.11"
+      PYTHON: "3.12"
       POETRY: "1.7.1"
       PROJECT_PATH: "backend"
     steps:
