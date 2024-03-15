@@ -1,7 +1,7 @@
 from uuid import UUID
 from datetime import date
 
-from fastapi import Body, Path, status
+from fastapi import status
 from pydantic import BaseModel
 from spakky.bean.autowired import autowired
 from spakky.cryptography.jwt import JWT
@@ -69,12 +69,7 @@ class UserManageRestApiController:
     @JWTAuth(LOGIN_URL)
     @Authorize({UserRole.BACKOFFICER})
     @put("/{user_id}/remark", name="사용자 주석 추가", status_code=status.HTTP_200_OK)
-    async def write_remark_api(
-        self,
-        token: JWT,  # pylint: disable=unused-argument
-        user_id: UUID = Path(),
-        request: WriteRemark = Body(),
-    ) -> None:
+    async def write_remark_api(self, _: JWT, user_id: UUID, request: WriteRemark) -> None:
         try:
             await self.write_remark.execute(
                 WriteRemarkCommand(
@@ -89,9 +84,7 @@ class UserManageRestApiController:
     @JWTAuth(LOGIN_URL)
     @Authorize({UserRole.BACKOFFICER})
     @post("", name="사용자 추가", status_code=status.HTTP_201_CREATED)
-    async def create_user_api(
-        self, token: JWT, request: CreateUser = Body()  # pylint: disable=unused-argument
-    ) -> None:
+    async def create_user_api(self, _: JWT, request: CreateUser) -> None:
         try:
             await self.create_user.execute(
                 CreateUserCommand(

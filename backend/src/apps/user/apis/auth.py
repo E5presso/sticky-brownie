@@ -1,3 +1,4 @@
+from typing import Annotated
 from datetime import date
 
 from fastapi import Depends, Header, status
@@ -93,13 +94,13 @@ class AuthenticationRestApiController:
             raise NotFound(error=e) from e
 
     @AsyncLogging()
-    @post("/login", name="로그인", status_code=status.HTTP_201_CREATED)
+    @post("/login", name="로그인", status_code=status.HTTP_200_OK)
     async def login_api(
         self,
-        request: OAuth2PasswordRequestForm = Depends(),
-        x_forwarded_for: str | None = Header(default=None),
-        ip_address: str | None = Header(default=None),
-        user_agent: str | None = Header(default=None),
+        request: Annotated[OAuth2PasswordRequestForm, Depends()],
+        x_forwarded_for: Annotated[str | None, Header()] = None,
+        ip_address: Annotated[str | None, Header()] = None,
+        user_agent: Annotated[str | None, Header()] = None,
     ) -> TokenResponse:
         try:
             token: JWT = await self.login.execute(

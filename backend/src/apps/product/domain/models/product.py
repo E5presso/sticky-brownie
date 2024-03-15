@@ -1,11 +1,8 @@
-from uuid import UUID, uuid4
-from typing import Self, Sequence
-from datetime import date, datetime
+from uuid import UUID
+from typing import Sequence
 
-from spakky.core.mutability import immutable, mutable
-from spakky.cryptography.password import Password
+from spakky.core.mutability import mutable
 from spakky.domain.models.aggregate_root import AggregateRoot
-from spakky.domain.models.domain_event import DomainEvent
 
 
 @mutable

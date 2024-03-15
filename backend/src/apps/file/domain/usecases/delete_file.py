@@ -34,9 +34,11 @@ class AsyncDeleteFileUseCase(IAsyncDeleteFileUseCase):
     @AsyncLogging()
     @AsyncTransactional()
     async def execute(self, command: DeleteFileCommand) -> None:
-        file: File | None = await self.repository.get_by_name_or_none(command.file_name)
+        file: File | None = await self.repository.single_by_filename_or_none(
+            command.filename
+        )
         if file is None:
-            raise FileNameNotFoundError(command.file_name)
+            raise FileNameNotFoundError(command.filename)
         await self.file_service.delete(file)
         await self.repository.delete(file)
         await self.event_publisher.publish(file)

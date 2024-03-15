@@ -1,6 +1,6 @@
 from uuid import UUID, uuid4
 from typing import Self
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 
 from spakky.core.mutability import immutable, mutable
 from spakky.cryptography.password import Password
@@ -177,7 +177,7 @@ class User(AggregateRoot[UUID]):
         self.add_event(self.ProfileUpdated(uid=self.uid))
 
     def agree_marketing_promotions(self) -> None:
-        self.marketing_promotions_agreement = datetime.utcnow()
+        self.marketing_promotions_agreement = datetime.now(UTC)
         self.add_event(self.MarketingPromotionsAgreed(uid=self.uid))
 
     def disagree_marketing_promotions(self) -> None:

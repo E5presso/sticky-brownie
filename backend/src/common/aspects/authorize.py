@@ -12,7 +12,7 @@ from spakky.core.annotation import FunctionAnnotation
 from spakky.core.types import AsyncFunc, P
 from spakky.cryptography.jwt import JWT
 from spakky_fastapi.error import Forbidden
-from spakky_fastapi.jwt_auth import IAuthenticatedFunction, R_co
+from spakky_fastapi.jwt_auth import IAuthenticatedFunction, JWTAuth, R_co
 
 from common.enums.user_role import UserRole
 
@@ -43,16 +43,24 @@ class AsyncAuthorizeAdvisor(IAsyncAdvisor):
 
     @Around(Authorize.contains)
     async def around_async(self, joinpoint: AsyncFunc, *args: Any, **kwargs: Any) -> Any:
-        jwt: JWT = kwargs["token"]
-        user_id: str | None = jwt.payload.get("sub", None)
-        role: UserRole | None = jwt.payload.get("role", None)
-        annotation: Authorize = Authorize.single(joinpoint)
-        if role not in annotation.roles:
+        jwt_auth: JWTAuth = JWTAuth.single(joinpoint)
+        for keyword in jwt_auth.token_keywords:
+            jwt: JWT = kwargs[keyword]
+            user_id: str | None = jwt.payload.get("sub", None)
+            role: UserRole | None = jwt.payload.get("role", None)
+            annotation: Authorize = Authorize.single(joinpoint)
+            if role not in annotation.roles:
+                self.__logger.info(
+                    (
+                        f"[{type(self).__name__}] [DENIED] {role!r}.{user_id} ",
+                        f"-> {annotation.roles!r} -> {joinpoint.__name__}",
+                    )
+                )
+                raise Forbidden(UserPermissionDeniedError())
             self.__logger.info(
-                f"[{type(self).__name__}] [DENIED] {role!r}.{user_id} -> {annotation.roles!r} -> {joinpoint.__name__}"
+                (
+                    f"[{type(self).__name__}] [GRANTED] {role!r}.{user_id} ",
+                    f"-> {annotation.roles!r} -> {joinpoint.__name__}",
+                )
             )
-            raise Forbidden(UserPermissionDeniedError())
-        self.__logger.info(
-            f"[{type(self).__name__}] [GRANTED] {role!r}.{user_id} -> {annotation.roles!r} -> {joinpoint.__name__}"
-        )
         return await joinpoint(*args, **kwargs)

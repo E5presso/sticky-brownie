@@ -2,7 +2,7 @@ from spakky.domain.error import SpakkyDomainError
 
 
 class FileNameAlreadyExistsError(SpakkyDomainError):
-    message = "이미 해당 이름의 파일이 존재합니다."
+    message = "이미 존재하는 파일입니다."
 
 
 class FileNameNotFoundError(SpakkyDomainError):
@@ -15,3 +15,7 @@ class FileNameMustNotBeEmptyError(SpakkyDomainError):
 
 class MediaTypeMustNotBeEmptyError(SpakkyDomainError):
     message = "파일 미디어 유형은 필수입니다."
+
+
+class FileSizeMustNotBeEmptyError(SpakkyDomainError):
+    message = "파일 크기는 필수입니다."

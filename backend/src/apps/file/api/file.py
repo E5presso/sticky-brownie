@@ -27,15 +27,15 @@ class FilesRestApiController:
 
     @AsyncLogging()
     @get(
-        "/{file_name}",
+        "/{filename}",
         name="파일 조회",
         response_class=StreamingResponse,
         status_code=status.HTTP_200_OK,
     )
-    async def get_file_api(self, file_name: str) -> StreamingResponse:
+    async def get_file_api(self, filename: str) -> StreamingResponse:
         try:
             stream, media_type = await self.get_file.execute(
-                GetFileQuery(file_name=file_name)
+                GetFileQuery(filename=filename)
             )
             return StreamingResponse(
                 stream,

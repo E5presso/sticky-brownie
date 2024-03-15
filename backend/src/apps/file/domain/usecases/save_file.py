@@ -34,10 +34,10 @@ class AsyncSaveFileUseCase(IAsyncSaveFileUseCase):
     @AsyncLogging()
     @AsyncTransactional()
     async def execute(self, command: SaveFileCommand) -> None:
-        if await self.repository.contains_by_name(command.file_name):
-            raise FileNameAlreadyExistsError(command.file_name)
+        if await self.repository.contains_by_filename(command.filename):
+            raise FileNameAlreadyExistsError(command.filename)
         file: File = File.create(
-            file_name=command.file_name,
+            filename=command.filename,
             media_type=command.media_type,
         )
         await self.file_service.save(file, command.stream)

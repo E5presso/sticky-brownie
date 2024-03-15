@@ -1,6 +1,6 @@
 import asyncio
 from typing import Sequence, AsyncGenerator
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from contextlib import asynccontextmanager
 
 from sqlalchemy.ext.asyncio.engine import AsyncEngine, create_async_engine
@@ -23,7 +23,7 @@ BACKOFFICERS: Sequence[User] = [
         gender=Gender.FEMALE,
         birth_date=date.fromisoformat("1998-11-25"),
         billing_name="강지은",
-        terms_and_conditions_agreement=datetime.utcnow(),
+        terms_and_conditions_agreement=datetime.now(UTC),
         marketing_promotions_agreement=None,
     )
 ]

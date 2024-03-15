@@ -13,7 +13,7 @@ class FileTable(TableBase[File]):
     __tablename__: str = "files"
 
     id: Mapped[UUID] = mapped_column(Uuid(), primary_key=True)
-    name: Mapped[str] = mapped_column(String())
+    filename: Mapped[str] = mapped_column(String())
     media_type: Mapped[str] = mapped_column(String())
     created_at: Mapped[datetime] = mapped_column(DateTime())
     updated_at: Mapped[datetime] = mapped_column(DateTime())
@@ -22,7 +22,7 @@ class FileTable(TableBase[File]):
     async def from_domain(cls, domain: File) -> Self:
         return cls(
             id=domain.uid,
-            name=domain.file_name,
+            filename=domain.filename,
             media_type=domain.media_type,
             created_at=domain.created_at,
             updated_at=domain.updated_at,
@@ -31,7 +31,7 @@ class FileTable(TableBase[File]):
     async def to_domain(self) -> File:
         return File(
             uid=self.id,
-            file_name=self.name,
+            filename=self.filename,
             media_type=self.media_type,
             created_at=self.created_at,
             updated_at=self.updated_at,

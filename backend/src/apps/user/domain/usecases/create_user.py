@@ -1,5 +1,5 @@
 from uuid import UUID
-from datetime import datetime
+from datetime import UTC, datetime
 
 from spakky.bean.autowired import autowired
 from spakky.extensions.logging import AsyncLogging
@@ -59,9 +59,9 @@ class CreateUserUseCase(IAsyncCreateUserUseCase):
             gender=command.gender,
             birth_date=command.birth_date,
             billing_name=command.billing_name,
-            terms_and_conditions_agreement=datetime.utcnow(),
+            terms_and_conditions_agreement=datetime.now(UTC),
             marketing_promotions_agreement=(
-                datetime.utcnow()
+                datetime.now(UTC)
                 if command.marketing_promotions_agreement is True
                 else None
             ),

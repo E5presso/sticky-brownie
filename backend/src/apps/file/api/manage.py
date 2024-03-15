@@ -1,4 +1,6 @@
-from fastapi import File, Path, UploadFile, status
+from fastapi import Request, status
+from multipart.multipart import parse_options_header
+from pydantic import BaseModel
 from spakky.bean.autowired import autowired
 from spakky.cryptography.jwt import JWT
 from spakky.extensions.logging import AsyncLogging
@@ -25,8 +27,13 @@ from common.aspects.authorize import Authorize
 from common.enums.api_catetory import ApiCatetory
 from common.enums.user_role import UserRole
 from common.settings.config import Config
+from common.utils.singlepart import AsyncSinglePartStream, FileInfo
 
 LOGIN_URL = Config().token.login_url
+
+
+class FileSaveResponse(BaseModel):
+    url: str
 
 
 @ApiController("/backoffice/files", tags=[ApiCatetory.BACKOFFICE])
@@ -46,33 +53,59 @@ class FileManageRestApiController:
     @AsyncLogging()
     @JWTAuth(LOGIN_URL)
     @Authorize({UserRole.BACKOFFICER})
-    @post("", name="파일 등록", status_code=status.HTTP_201_CREATED)
-    async def save_file_api(
-        self, token: JWT, file: UploadFile = File()  # pylint: disable=unused-argument
-    ) -> None:
-        if file.filename is None:
+    @post(
+        "",
+        name="파일 등록",
+        status_code=status.HTTP_201_CREATED,
+        openapi_extra={
+            "requestBody": {
+                "content": {
+                    "multipart/form-data": {
+                        "schema": {
+                            "required": ["file"],
+                            "type": "object",
+                            "properties": {
+                                "file": {"type": "file"},
+                            },
+                        }
+                    }
+                },
+                "required": True,
+            },
+        },
+    )
+    async def save_file_api(self, _: JWT, request: Request) -> FileSaveResponse:
+        content_type: str | None = request.headers.get("content-type")
+        if content_type is None:
+            raise BadRequest(MediaTypeMustNotBeEmptyError())
+        __, params = parse_options_header(content_type)
+        boundary = params.get(b"boundary")
+        if boundary is None:
+            raise BadRequest(MediaTypeMustNotBeEmptyError())
+        stream = AsyncSinglePartStream(boundary, request.stream())
+        field_data: FileInfo = await stream.get_file_info()
+        if field_data.filename is None:
             raise BadRequest(FileNameMustNotBeEmptyError())
-        if file.content_type is None:
+        if field_data.content_type is None:
             raise BadRequest(MediaTypeMustNotBeEmptyError())
         try:
             await self.save_file.execute(
                 SaveFileCommand(
-                    file_name=file.filename,
-                    media_type=file.content_type,
-                    stream=file,
+                    filename=field_data.filename,
+                    media_type=field_data.content_type,
+                    stream=stream.stream(),
                 )
             )
+            return FileSaveResponse(url=f"/files/{field_data.filename}")
         except FileNameAlreadyExistsError as e:
             raise Conflict(error=e) from e
 
     @AsyncLogging()
     @JWTAuth(LOGIN_URL)
     @Authorize({UserRole.BACKOFFICER})
-    @delete("/{file_name}", name="파일 삭제", status_code=status.HTTP_204_NO_CONTENT)
-    async def delete_file_api(
-        self, token: JWT, file_name: str = Path()  # pylint: disable=unused-argument
-    ) -> None:
+    @delete("/{filename}", name="파일 삭제", status_code=status.HTTP_204_NO_CONTENT)
+    async def delete_file_api(self, _: JWT, filename: str) -> None:
         try:
-            await self.delete_file.execute(DeleteFileCommand(file_name=file_name))
+            await self.delete_file.execute(DeleteFileCommand(filename=filename))
         except FileNameNotFoundError as e:
             raise NotFound(error=e) from e

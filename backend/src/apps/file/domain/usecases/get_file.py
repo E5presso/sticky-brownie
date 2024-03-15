@@ -1,3 +1,5 @@
+from typing import AsyncGenerator
+
 from spakky.bean.autowired import autowired
 from spakky.extensions.logging import AsyncLogging
 from spakky.extensions.transactional import AsyncTransactional
@@ -6,10 +8,7 @@ from spakky.stereotype.usecase import UseCase
 from apps.file.domain.errors import FileNameNotFoundError
 from apps.file.domain.interfaces.event.publisher import IAsyncFileEventPublisher
 from apps.file.domain.interfaces.persistency.repository import IAsyncFileRepository
-from apps.file.domain.interfaces.service.file_service import (
-    IAsyncFileService,
-    IAsyncOutStream,
-)
+from apps.file.domain.interfaces.service.file_service import IAsyncFileService
 from apps.file.domain.interfaces.usecases.get_file import (
     GetFileQuery,
     IAsyncGetFileUseCase,
@@ -36,8 +35,12 @@ class AsyncGetFileUseCase(IAsyncGetFileUseCase):
 
     @AsyncLogging()
     @AsyncTransactional()
-    async def execute(self, query: GetFileQuery) -> tuple[IAsyncOutStream, str]:
-        file: File | None = await self.repository.get_by_name_or_none(query.file_name)
+    async def execute(
+        self, query: GetFileQuery
+    ) -> tuple[AsyncGenerator[bytes, None], str]:
+        file: File | None = await self.repository.single_by_filename_or_none(
+            query.filename
+        )
         if file is None:
-            raise FileNameNotFoundError(query.file_name)
-        return (await self.file_service.get_by_id(file), file.media_type)
+            raise FileNameNotFoundError(query.filename)
+        return self.file_service.get_by_id(file), file.media_type

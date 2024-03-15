@@ -51,11 +51,11 @@ class AsyncFileRepository(IAsyncFileRepository):
         return await result.to_domain() if result is not None else None
 
     @AsyncLogging()
-    async def get_by_name_or_none(self, name: str) -> File | None:
+    async def single_by_filename_or_none(self, filename: str) -> File | None:
         result = (
             (
                 await self.transaction.session.execute(
-                    select(FileTable).where(FileTable.name == name)
+                    select(FileTable).where(FileTable.filename == filename)
                 )
             )
             .unique()
@@ -72,10 +72,10 @@ class AsyncFileRepository(IAsyncFileRepository):
         ).scalar_one_or_none() is not None
 
     @AsyncLogging()
-    async def contains_by_name(self, name: str) -> bool:
+    async def contains_by_filename(self, filename: str) -> bool:
         return (
             await self.transaction.session.execute(
-                select(FileTable.id).where(FileTable.name == name)
+                select(FileTable.id).where(FileTable.filename == filename)
             )
         ).scalar_one_or_none() is not None
 

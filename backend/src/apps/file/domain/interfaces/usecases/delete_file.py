@@ -6,7 +6,7 @@ from spakky.domain.usecases.command import Command, IAsyncCommandUseCase
 
 @immutable
 class DeleteFileCommand(Command):
-    file_name: str
+    filename: str
 
 
 class IAsyncDeleteFileUseCase(

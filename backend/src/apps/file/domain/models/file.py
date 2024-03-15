@@ -9,8 +9,8 @@ from spakky.domain.models.domain_event import DomainEvent
 
 @mutable
 class File(AggregateRoot[UUID]):
-    file_name: str
-    """파일명"""
+    filename: str
+    """파일 이름"""
     media_type: str
     """미디어 유형"""
     created_at: datetime
@@ -27,10 +27,10 @@ class File(AggregateRoot[UUID]):
         return uuid4()
 
     @classmethod
-    def create(cls, file_name: str, media_type: str) -> Self:
+    def create(cls, filename: str, media_type: str) -> Self:
         return cls(
             uid=cls.next_id(),
-            file_name=file_name,
+            filename=filename,
             media_type=media_type,
             created_at=datetime.now(),
             updated_at=datetime.now(),
