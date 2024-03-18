@@ -35,7 +35,7 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
     engine: AsyncEngine = create_async_engine(
         url=config.database.url,
         pool_size=config.database.pool_size,
-        echo=config.debug,
+        echo=config.common.debug,
     )
     session: AsyncSession = async_sessionmaker(bind=engine, expire_on_commit=False)()
     yield session

@@ -64,7 +64,7 @@ def run_migrations_online() -> None:
             create_async_engine(
                 url=server_config.database.url,
                 pool_size=server_config.database.pool_size,
-                echo=server_config.debug,
+                echo=server_config.common.debug,
             )
         )
     )

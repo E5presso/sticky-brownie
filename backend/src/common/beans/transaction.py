@@ -30,7 +30,7 @@ class AsyncTransaction(AbstractAsyncTranasction):
         self.__engine = create_async_engine(
             url=config.database.url,
             pool_size=config.database.pool_size,
-            echo=config.debug,
+            echo=config.common.debug,
         )
         self.__scoped_sessionmaker = async_sessionmaker(
             bind=self.__engine,

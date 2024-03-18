@@ -50,13 +50,18 @@ class FileSetting(BaseSettings):
     chunk_size: int = 1024 * 1024
 
 
+class CommonSetting(BaseSettings):
+    debug: bool = False
+    service_url: str = ""
+
+
 @Configuration()
 class Config(BaseSettings):
     model_config: ClassVar[SettingsConfigDict] = SettingsConfigDict(
         env_file_encoding="utf-8",
         env_nested_delimiter="__",
     )
-    debug: bool = False
+    common: CommonSetting = CommonSetting()
     database: DatabaseSetting = DatabaseSetting()
     token: TokenSetting = TokenSetting()
     file: FileSetting = FileSetting()

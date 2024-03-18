@@ -38,15 +38,18 @@ class FileSaveResponse(BaseModel):
 
 @ApiController("/backoffice/files", tags=[ApiCatetory.BACKOFFICE])
 class FileManageRestApiController:
+    config: Config
     save_file: IAsyncSaveFileUseCase
     delete_file: IAsyncDeleteFileUseCase
 
     @autowired
     def __init__(
         self,
+        config: Config,
         save_file: IAsyncSaveFileUseCase,
         delete_file: IAsyncDeleteFileUseCase,
     ) -> None:
+        self.config = config
         self.save_file = save_file
         self.delete_file = delete_file
 
@@ -96,7 +99,9 @@ class FileManageRestApiController:
                     stream=stream.stream(),
                 )
             )
-            return FileSaveResponse(url=f"/files/{field_data.filename}")
+            return FileSaveResponse(
+                url=f"{self.config.common.service_url}/files/{field_data.filename}"
+            )
         except FileNameAlreadyExistsError as e:
             raise Conflict(error=e) from e
 
