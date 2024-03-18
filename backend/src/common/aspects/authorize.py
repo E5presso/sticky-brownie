@@ -51,16 +51,10 @@ class AsyncAuthorizeAdvisor(IAsyncAdvisor):
             annotation: Authorize = Authorize.single(joinpoint)
             if role not in annotation.roles:
                 self.__logger.info(
-                    (
-                        f"[{type(self).__name__}] [DENIED] {role!r}.{user_id} ",
-                        f"-> {annotation.roles!r} -> {joinpoint.__name__}",
-                    )
+                    f"[{type(self).__name__}] [DENIED] {role!r}.{user_id} -> {annotation.roles!r} -> {joinpoint.__name__}"
                 )
                 raise Forbidden(UserPermissionDeniedError())
             self.__logger.info(
-                (
-                    f"[{type(self).__name__}] [GRANTED] {role!r}.{user_id} ",
-                    f"-> {annotation.roles!r} -> {joinpoint.__name__}",
-                )
+                f"[{type(self).__name__}] [GRANTED] {role!r}.{user_id} -> {annotation.roles!r} -> {joinpoint.__name__}"
             )
         return await joinpoint(*args, **kwargs)
